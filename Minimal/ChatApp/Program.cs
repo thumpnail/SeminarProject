@@ -8,7 +8,7 @@ HttpClient client = new HttpClient {
 };
 
 Console.WriteLine("Welcome to the ChatRoom Application!");
-
+var currentRoom = "";
 var input = "";
 var welcomeMsg = await client.GetAsync("/");
 Console.WriteLine(welcomeMsg.Content.ReadAsStringAsync().Result);
@@ -23,10 +23,8 @@ do {
 			var password = parts[2];
 
 			var loginResponse = await client.PostAsync("/login",
-			JsonContent.Create(new LoginContract {
-				Username = username,
-				Password = password
-			}));
+				JsonContent.Create(new LoginContract(username, password))
+			);
 
 			Console.WriteLine(loginResponse.Content.ReadFromJsonAsync<LoginResponseContract>().Result.ToJson());
 		}
@@ -39,14 +37,13 @@ do {
 	} else {
 		Console.WriteLine("Sending message...");
 		// call api endpoint to send message
-		Console.WriteLine($"Message sent: {input}");
-
 		var messageResponse = await client.PostAsync("/send",
-		JsonContent.Create(new MessageSendContract {
-			Sender = "User",
-			Receiver = "Receiver",
-			Content = input
-		}));
+		JsonContent.Create(new MessageSendContract(
+			"User",
+			"Receiver",
+			input
+		)));
+		Console.WriteLine($"Message sent: {input}");
 
 		Console.WriteLine(messageResponse.Content.ReadFromJsonAsync<MessageSendResponseContract>().Result.ToJson());
 	}

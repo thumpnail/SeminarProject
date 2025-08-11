@@ -1,10 +1,14 @@
 ﻿namespace Chat.Common.Models;
 
-public class Message {
-    public required Identifier ID { get; set; }
-    public required Identifier UserId { get; set; } // Sender
-    public required Identifier ReceiverId { get; set; } // Empfänger (optional für Direktnachrichten)
-    public required Identifier ChatRoomId { get; set; } // Referenz auf den Raum
-    public required string Content { get; set; }
-    public required DateTime Timestamp { get; set; }
+using LiteDB;
+using MessagePack;
+
+[MessagePackObject]
+public record Message {
+    [Key(0)] [BsonId] public required Identifier Id { get; set; }
+    [Key(1)] [BsonRef("users")] public required User User { get; set; } // Sender
+    [Key(2)] [BsonRef("users")] public required User ReceivingUser { get; set; } // Empfänger (optional für Direktnachrichten)
+    [Key(3)] [BsonRef("chats")] public required ChatRoom ChatRoom { get; set; } // Referenz auf den Raum
+    [Key(4)] public required string Content { get; set; }
+    [Key(5)] public required DateTime Timestamp { get; set; }
 }

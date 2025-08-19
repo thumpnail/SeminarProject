@@ -22,11 +22,10 @@ app.MapGet("/", () => "Type=ChatHistoryService");
 app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyContract) => {
     // Hier könnte Logik zum Abrufen der ChatRoom-Historie stehen
     // TODO: call DB Service to get messages for room and time range
-    var response = new HistoryResponseContract {
-        UserId = historyContract.UserId,
-        ChatId = historyContract.ChatId,
-        Messages = new List<Chat.Common.Models.Message>() // TODO: mit echten Nachrichten füllen
-    };
+
+    var DBResponse = new List<Chat.Common.Models.Message> {};
+
+    var response = new HistoryResponseContract(new(), true);
     return Results.Json(response);
 });
 

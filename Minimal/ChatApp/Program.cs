@@ -3,48 +3,54 @@
 using Chat.Common;
 using System.Net.Http.Json;
 using Chat.Common.Contracts;
-HttpClient client = new HttpClient {
+using ChatApp;
+using ChatApp.UI;
+using Terminal.Gui.App;
+
+var messagingClient = new HttpClient {
 	BaseAddress = new Uri(Addresses.CHAT_MESSAGING_SERVICE)
+};
+var historyClient = new HttpClient {
+	BaseAddress = new Uri(Addresses.CHAT_HISTORY_SERVICE)
 };
 
 Console.WriteLine("Welcome to the ChatRoom Application!");
-var currentRoom = "";
+// Console.Write("Please provide your username(use ',' to separate):");
+// var currentUser = Console.ReadLine();
+// Console.Write("Receivers:");
+// var currentReceiver = Console.ReadLine().Split(',').Select(r => r.Trim()).ToList();
 var input = "";
-var welcomeMsg = await client.GetAsync("/");
-Console.WriteLine(welcomeMsg.Content.ReadAsStringAsync().Result);
-do {
-	input = Console.ReadLine();
-	// send message to api endpoint
-	if (input.StartsWith("!login")) {
-		Console.WriteLine("Logging in...");
-		try {
-			var parts = input.Split(' ');
-			var username = parts[1];
-			var password = parts[2];
+//
+// try {
+// 	var welcomeMsg = await messagingClient.GetAsync("/");
+// 	Console.WriteLine(welcomeMsg.Content.ReadAsStringAsync().Result);
+// }
+// catch (Exception e) {
+// 	Console.WriteLine("Error connecting to the chat service");
+// }
 
-			var loginResponse = await client.PostAsync("/login",
-				JsonContent.Create(new LoginContract(username, password))
-			);
-
-			Console.WriteLine(loginResponse.Content.ReadFromJsonAsync<LoginResponseContract>().Result.ToJson());
+Application.Run<TermUI>().Dispose();
+Application.Shutdown();
+/*
+// Get chat history between current user and receiver
+var historyRetrieveContract = new HistoryRetrieveContract(currentUser, currentReceiver, DateTime.Now.AddDays(-1), 50);
+var historyResponse = await client.PostAsJsonAsync("/history", historyRetrieveContract);
+if (historyResponse.IsSuccessStatusCode) {
+	var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
+	if (history != null && history.Messages.Count > 0) {
+		Console.WriteLine("Chat History:");
+		foreach (var message in history.Messages) {
+			Console.WriteLine($"{message.Timestamp}: {message.SendingUser.Username}: {message.Content}");
 		}
-		catch (Exception e) {
-			Console.WriteLine(e);
-		}
-	} else if (input.StartsWith("!logout")) {
-		Console.WriteLine("Logging out...");
-		return;
 	} else {
-		Console.WriteLine("Sending message...");
-		// call api endpoint to send message
-		var messageResponse = await client.PostAsync("/send",
-		JsonContent.Create(new MessageSendContract(
-			"User",
-			"Receiver",
-			input
-		)));
-		Console.WriteLine($"Message sent: {input}");
-
-		Console.WriteLine(messageResponse.Content.ReadFromJsonAsync<MessageSendResponseContract>().Result.ToJson());
+		Console.WriteLine("No chat history found.");
 	}
-} while (input.Contains("!logout") == false);
+} else {
+	Console.WriteLine("Failed to retrieve chat history.");
+}
+*/
+//do {
+//	input = Console.ReadLine();
+//	// send message to api endpoint
+//
+//} while (input.Contains("!logout") == false);

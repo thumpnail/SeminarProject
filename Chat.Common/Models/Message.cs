@@ -3,12 +3,23 @@
 using LiteDB;
 using MessagePack;
 
-[MessagePackObject]
 public record Message {
-    [Key(0)] [BsonId] public required Identifier Id { get; set; }
-    [Key(1)] [BsonRef("users")] public required User User { get; set; } // Sender
-    [Key(2)] [BsonRef("users")] public required User ReceivingUser { get; set; } // Empfänger (optional für Direktnachrichten)
-    [Key(3)] [BsonRef("chats")] public required ChatRoom ChatRoom { get; set; } // Referenz auf den Raum
-    [Key(4)] public required string Content { get; set; }
-    [Key(5)] public required DateTime Timestamp { get; set; }
+    [BsonId] public required Identifier Id { get; set; } // 'user1-user2-user3' für Gruppenchats (alphabetisch sortiert), 'user1-user2' für Direktnachrichten
+    [BsonRef(CollectionName.USERS)] public required User SendingUser { get; set; } // Sender
+    [BsonRef(CollectionName.ROOMS)] public required ChatRoom ChatRoom { get; set; } // Chatraum, in dem die Nachricht gesendet wurde
+    public required string Content { get; set; }
+    public required DateTime Timestamp { get; set; }
+    public static Message GenerateMessage(string sender, string chatRoom, string content) {
+        return new Message {
+            Id = Guid.NewGuid().ToString(),
+            SendingUser = new() {
+                Username = sender,
+                Id = sender,
+                ChatRooms = []
+            },
+            ChatRoom = default,
+            Content = content,
+            Timestamp = DateTime.Now
+        };
+    }
 }

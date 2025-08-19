@@ -32,6 +32,7 @@ if (app.Environment.IsDevelopment()) {
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
 app.MapPost("/send", async ([FromBody] MessageSendContract messageSend) => {
+    Console.WriteLine($"({messageSend.Sender} -> {messageSend.Content} -> {messageSend.Receiver})");
     return Results.Json(new{});
 });
 

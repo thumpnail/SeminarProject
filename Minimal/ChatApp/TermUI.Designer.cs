@@ -8,6 +8,11 @@
 //      the code is regenerated.
 //  </auto-generated>
 // -----------------------------------------------------------------------------
+using System.Net.Http.Json;
+
+using Chat.Common.Contracts;
+using Chat.Common.Models;
+
 using JetBrains.Annotations;
 namespace ChatApp.UI {
     using System;
@@ -53,11 +58,13 @@ namespace ChatApp.UI {
                 Width = Dim.Fill(1),
                 Height = Dim.Fill(5),
                 Text = "",
-                TextAlignment = Terminal.Gui.ViewBase.Alignment.Start,
                 CanFocus = false,
-                Arrangement = ViewArrangement.Fixed,
-                VerticalScrollBar = { Width = 1, Visible = true, CanFocus = false, BorderStyle = LineStyle.Rounded,
-                                  TextDirection = TextDirection.LeftRight_TopBottom },
+                VerticalScrollBar = {
+                    Width = 1,
+                    Visible = true,
+                    CanFocus = false,
+                    BorderStyle = LineStyle.Single,
+                    TextDirection = TextDirection.RightLeft_BottomTop },
                 Source = messages as IListDataSource,
             };
             messageList.SetSource(new ObservableCollection<string>(messages));
@@ -84,7 +91,13 @@ namespace ChatApp.UI {
                     if (!string.IsNullOrWhiteSpace(message)) {
                         // Add message to chat view or send to server
                         AddMessages(("You", message));
-                        Program
+                        SendMessageAsync(new("You", "User", message)).ContinueWith((task) => {
+                            if (task.Result.Success) {
+                                statusBar.Text = "Message sent successfully.";
+                            } else {
+                                statusBar.Text = "Failed to send message: " + task.Result.Message;
+                            }
+                        });
                         // clearing the field
                         messageField.Text = string.Empty;
                     }
@@ -119,6 +132,23 @@ namespace ChatApp.UI {
                 messages.Add(message.username + ": " + message.message);
             }
             UpdateListView();
+        }
+
+        public async Task<HistoryResponseContract> GetChatHistoryAsync(HistoryRetrieveContract historyContract) {
+            var response = await Program.historyClient.PostAsJsonAsync("/history", historyContract);
+            if (response.IsSuccessStatusCode) {
+                return await response.Content.ReadFromJsonAsync<HistoryResponseContract>();
+            }
+            AddMessages(("System","Failed to retrieve chat history."));
+            return new HistoryResponseContract(new List<Message>(), false);
+        }
+        public async Task<MessageSendResponseContract> SendMessageAsync(MessageSendContract messageContract) {
+            var response = await Program.messagingClient.PostAsJsonAsync("/send", messageContract);
+            if (response.IsSuccessStatusCode) {
+                return await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
+            }
+            AddMessages(("System", "Failed to send message."));
+            return new MessageSendResponseContract("Failed to send message.", false);
         }
     }
 }

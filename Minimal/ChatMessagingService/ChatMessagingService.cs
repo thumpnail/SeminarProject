@@ -1,6 +1,10 @@
-﻿using Chat.Common;
+﻿using System.Net.Http.Json;
+
+using Chat.Common;
 using Chat.Common.Contracts;
+
 using MessagePack;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -31,16 +35,29 @@ if (app.Environment.IsDevelopment()) {
 
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
-// receive a message
-app.MapPost("/send", async ([FromBody] MessageSendContract messageSend) => {
-    Console.WriteLine($"({messageSend.Sender} -> {messageSend.Content} -> {messageSend.RoomId})");
-    return Results.Json(new MessageSendResponseContract(messageSend.Content, true));
+// receive a Message
+app.MapPost("/send", async ([FromBody] MessageSendContract msgSend) => {
+    var response = await dbClient.PostAsJsonAsync("/insertMessage", msgSend);
+
+    var msgSendResponse = await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
+
+    if (msgSendResponse is null) {
+        return Results.Json(new MessageSendResponseContract("Failed to send Message", false));
+    }
+
+    return Results.Json(msgSendResponse);
 });
 // create a room
 app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
-    var roomId = Guid.NewGuid().ToString();
-    Console.WriteLine($"({room.sender} -> {string.Join(", ", room.receivers)})");
-    return Results.Json(new RoomRetrieveResponseContract(roomId, true));
+    var roomResponse = await dbClient.PostAsJsonAsync("/getroom",
+    new RoomRetrieveContract(room.Sender, room.Receivers));
+
+    var parsedRoom = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
+
+    if (parsedRoom == null) {
+        return Results.Json(new RoomRetrieveResponseContract(false, Message:"Failed to retrieve room"));
+    }
+    return Results.Json(new RoomRetrieveResponseContract(parsedRoom.Success, parsedRoom.Message, parsedRoom.RoomId));
 });
 
 // Run the web server

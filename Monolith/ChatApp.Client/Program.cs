@@ -1,7 +1,5 @@
-﻿namespace ChatApp.Client;
+﻿using Chat.Common;
+var client = new HttpClient { BaseAddress = new Uri(Addresses.CHAT_MONOLITH_SERVICE) };
 
-class Program {
-	static void Main(string[] args) {
-		Console.WriteLine("Hello, World!");
-	}
-}
+
+Console.WriteLine(client.GetAsync("/").Result);

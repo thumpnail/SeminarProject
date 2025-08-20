@@ -36,10 +36,16 @@ var roomId = await GetRoomAsync(currentUser, currentReceivers);
 
 // Get chat history between current user and receiver
 await GetChatHistory(roomId);
+Task.Run(() => {
+    while (true) {
+        Thread.Sleep(2000);
+        // Fetch last messages from the chat history
+        FetchLastMessages(roomId);
+    }
+});
 
 var input = string.Empty;
 do {
-    Console.Write("You: ");
     input = Console.ReadLine();
     if (input.Equals("!logout")) {
         break;
@@ -101,36 +107,32 @@ async Task<string> GetRoomAsync(string sender, string[] receivers) {
 async Task FetchLastMessages(string roomId) {
     currentReceivers.Order();
     var historyRetrieveContract = new HistoryRetrieveContract(roomId, lastMessageTimestamp, -1);
+    lastMessageTimestamp = DateTime.Now;
     var historyResponse = await historyClient.PostAsJsonAsync("/history", historyRetrieveContract);
     if (historyResponse.IsSuccessStatusCode) {
         var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
         if (history != null && history.Messages.Count > 0) {
-            Console.WriteLine("Last Messages:");
             foreach (var message in history.Messages) {
-                Console.WriteLine($"{message.Timestamp}: {message.SendingUser.Username}: {message.Content}");
+                Console.WriteLine($"{message.Content}");
             }
-        } else {
-            Console.WriteLine("No messages found.");
         }
-    } else {
-        Console.WriteLine("Failed to retrieve messages.");
     }
 }
 
 async Task GetChatHistory(string roomId) {
     // Fetch the last messages from the chat history
-    var last = DateTime.Now.AddDays(-1);
-    lastMessageTimestamp = last;
+    lastMessageTimestamp = DateTime.Now.AddDays(-1);
     // Sort the Receivers to ensure consistent room ID generation
     currentReceivers.Order();
     // Retrieve the chat history for the room
-    var historyResponse = await historyClient.PostAsJsonAsync("/history", new HistoryRetrieveContract(roomId, last, 50));
+    var historyResponse = await historyClient.PostAsJsonAsync("/history", new HistoryRetrieveContract(roomId, lastMessageTimestamp, 50));
     if (historyResponse.IsSuccessStatusCode) {
         // Read the response content as HistoryResponseContract
         var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
         if (history != null && history.Messages.Count > 0) {
             Console.WriteLine("Chat History:");
             foreach (var message in history?.Messages) {
+                lastMessageTimestamp = message.Timestamp;
                 Console.WriteLine($"{message?.SendingUser?.Username}: {message?.Content}");
             }
         } else {

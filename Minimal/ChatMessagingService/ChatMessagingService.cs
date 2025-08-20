@@ -31,9 +31,16 @@ if (app.Environment.IsDevelopment()) {
 
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
+// receive a message
 app.MapPost("/send", async ([FromBody] MessageSendContract messageSend) => {
-    Console.WriteLine($"({messageSend.Sender} -> {messageSend.Content} -> {messageSend.Receiver})");
-    return Results.Json(new{});
+    Console.WriteLine($"({messageSend.Sender} -> {messageSend.Content} -> {messageSend.RoomId})");
+    return Results.Json(new MessageSendResponseContract(messageSend.Content, true));
+});
+// create a room
+app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
+    var roomId = Guid.NewGuid().ToString();
+    Console.WriteLine($"({room.sender} -> {string.Join(", ", room.receivers)})");
+    return Results.Json(new RoomRetrieveResponseContract(roomId, true));
 });
 
 // Run the web server

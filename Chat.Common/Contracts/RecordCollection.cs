@@ -1,8 +1,15 @@
-﻿namespace Chat.Common.Contracts;
+﻿global using Identifier = string;
+global using ID = string;
+
+namespace Chat.Common.Contracts;
+
 using Models;
 
-public record MessageSendContract(string Sender, string Receiver, string Content);
+public record MessageSendContract(string Sender, ID RoomId, string Content);
 public record MessageSendResponseContract(string Message, bool Success);
 
-public record HistoryRetrieveContract(Identifier SenderId, Identifier ReceiverId, DateTime StartDate, int Limit = 50);
+public record HistoryRetrieveContract(ID RoomId, DateTime StartDate, int Limit = 50);
 public record HistoryResponseContract(List<Message> Messages, bool Success);
+
+public record RoomRetrieveContract(string sender, string[] receivers);
+public record RoomRetrieveResponseContract(ID RoomId, bool Success);

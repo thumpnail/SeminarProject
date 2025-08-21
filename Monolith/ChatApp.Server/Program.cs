@@ -55,7 +55,7 @@ app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract, Databa
     return Results.Json(new MessageSendResponseContract(messageSendContract.Content, true));
 });
 
-app.MapPost("/getMessages", ([FromBody] HistoryRetrieveContract historyRetrieveContract, DatabaseService db) => {
+app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContract, DatabaseService db) => {
     Thread.Sleep(10);
     ChatRoom room;
     room = db.roomCollection.FindOne(r => r.Id.Equals(historyRetrieveContract.RoomId));
@@ -73,7 +73,7 @@ app.MapPost("/getMessages", ([FromBody] HistoryRetrieveContract historyRetrieveC
     return Results.Json(new HistoryResponseContract(messages, true));
 });
 
-app.MapPost("/getroom", ([FromBody] RoomRetrieveContract roomRetrieveContract, DatabaseService db) => {
+app.MapPost("/room", ([FromBody] RoomRetrieveContract roomRetrieveContract, DatabaseService db) => {
     Thread.Sleep(10);
     List<string> usernames = [roomRetrieveContract.Sender];
     usernames.AddRange(roomRetrieveContract.Receivers);

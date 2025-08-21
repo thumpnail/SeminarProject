@@ -31,7 +31,7 @@ public static class Helper {
         }
     }
     public static async Task<string> GetRoomAsync(this HttpClient client, string sender, string[] receivers) {
-        var roomResponse = await client.PostAsJsonAsync("/getroom",
+        var roomResponse = await client.PostAsJsonAsync("/room",
         new RoomRetrieveContract(sender, receivers));
 
         if (roomResponse.IsSuccessStatusCode) {
@@ -47,7 +47,7 @@ public static class Helper {
     public static async Task FetchLastMessages(this HttpClient client, string roomId) {
         var historyRetrieveContract = new HistoryRetrieveContract(roomId, lastMessageTimestamp, -1);
         lastMessageTimestamp = DateTime.Now;
-        var historyResponse = await client.PostAsJsonAsync("/getMessages", historyRetrieveContract);
+        var historyResponse = await client.PostAsJsonAsync("/history", historyRetrieveContract);
         if (historyResponse.IsSuccessStatusCode) {
             var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
             if (history != null && history.Messages.Count > 0) {
@@ -62,7 +62,7 @@ public static class Helper {
         // Fetch the last messages from the chat history
         lastMessageTimestamp = DateTime.Now.AddDays(-1);
         // Retrieve the chat history for the room
-        var historyResponse = await client.PostAsJsonAsync("/getMessages", new HistoryRetrieveContract(roomId, lastMessageTimestamp, 50));
+        var historyResponse = await client.PostAsJsonAsync("/history", new HistoryRetrieveContract(roomId, lastMessageTimestamp, 50));
         if (historyResponse.IsSuccessStatusCode) {
             // Read the response content as HistoryResponseContract
             var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();

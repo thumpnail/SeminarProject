@@ -56,9 +56,9 @@ app.MapPost("/getMessages", async ([FromBody] HistoryRetrieveContract historyRet
     var room = roomCollection.FindOne(r => r.Id.Equals(historyRetrieveContract.RoomId));
 
     var messages = messagesCollection
-        .Include(m=>m.ChatRoom)
-        .Include(m => m.ChatRoom.Users)
-        .Include(m => m.SendingUser)
+        //.Include(m=>m.ChatRoom)
+        //.Include(m => m.ChatRoom.Users)
+        //.Include(m => m.SendingUser)
         .Find(x=> x.ChatRoom.Id.Equals(historyRetrieveContract.RoomId))
         .Where(x=>x.Timestamp > historyRetrieveContract.StartDate)
         .ToList();

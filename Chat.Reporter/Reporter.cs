@@ -7,7 +7,7 @@ public class Reporter {
     private LiteDB.LiteDatabase db { get; set; }
     private ILiteCollection<Data> dataCollection { get; set; }
     public Reporter() {
-        db = new LiteDB.LiteDatabase("../../../../Chat.Tests/bin/Debug/net9.0/benchmark.db");
+        db = new LiteDB.LiteDatabase("../../../../Chat.Tests/benchmark-1.db");
         dataCollection = db.GetCollection<Data>("data");
         type = "ChatMicroservice";
     }

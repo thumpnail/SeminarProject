@@ -1,0 +1,1 @@
+﻿public record Data(string runIndexIdentifier, string endpoint, DateTime timestamp, float durationMs, string sender, string receiver);

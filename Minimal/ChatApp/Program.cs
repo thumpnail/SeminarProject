@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using System.Net.Http.Json;
+using System.Runtime.Serialization;
 
 using Chat.Common;
 using Chat.Common.Contracts;

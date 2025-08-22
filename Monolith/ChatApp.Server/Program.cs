@@ -27,7 +27,7 @@ if (app.Environment.IsDevelopment()) {
     //app.UseSwaggerUI();
 }
 
-Database Database = new();
+Database Database = new("../../../../../chat-monolith.db");
 
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");

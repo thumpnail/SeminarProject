@@ -30,7 +30,7 @@ var app = builder.Build();
 // Swagger aktivieren
 if (app.Environment.IsDevelopment()) { }
 
-Database Database = new();
+Database Database = new("../../../../../chat-microservice.db");
 // Beispiel-Endpunkt
 app.MapGet("/", () => "Type=ChatDatabaseService");
 

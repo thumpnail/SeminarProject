@@ -13,15 +13,16 @@ public interface IDatabase {
 }
 
 public class Database : IDatabase {
-    private const string DATABASE_PATH = "./chat.db";
+    private string _databasePath = "./chat.db";
     private LiteDatabase db;
 
     private ILiteCollection<ChatRoom> roomCollection;
     private ILiteCollection<User> usersCollection;
     private ILiteCollection<Message> messagesCollection;
 
-    public Database() {
-        db = new LiteDatabase(DATABASE_PATH);
+    public Database(string databasePath = "./chat.db") {
+        _databasePath = databasePath;
+        db = new LiteDatabase(_databasePath);
         roomCollection = db.GetCollection<ChatRoom>(CollectionName.ROOMS);
         usersCollection = db.GetCollection<User>(CollectionName.USERS);
         messagesCollection = db.GetCollection<Message>(CollectionName.MESSAGES);

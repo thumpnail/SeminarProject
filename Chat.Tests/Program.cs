@@ -2,7 +2,7 @@
 
 using Chat.Tests;
 
-const string connectionString = "../../../benchmark-1.db";
+string connectionString = $"../../../../benchmark.db";
 
 if (File.Exists(connectionString)) {
     File.Delete(connectionString);
@@ -29,20 +29,20 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
     // TODO: Create a report for microserviceTester(Atom/Single/Sub)
     var microserviceBenchmarkReport = ReportHelper.CreateReport(microserviceTester, out var microserviceReport);
     Console.WriteLine(microserviceReport);
-    File.WriteAllLinesAsync($"../../../microservice-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", microserviceBenchmarkReport.Split('\n'));
+    File.WriteAllLinesAsync($"../../../../Reports/microservice-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", microserviceBenchmarkReport.Split('\n'));
 
     monolithTester.Run();
     // TODO: Create a report for monolithTester(Atom/Single/Sub)
     var monolithBenchmarkReport = ReportHelper.CreateReport(monolithTester, out var monolithReport);
     Console.WriteLine(monolithReport);
-    File.WriteAllLinesAsync($"../../../monolith-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", monolithBenchmarkReport.Split('\n'));
+    File.WriteAllLinesAsync($"../../../../Reports/monolith-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", monolithBenchmarkReport.Split('\n'));
 
 
 
     // TODO: Create a combined/full report / Based on ReportHelper.Active
     var combinedBenchmarkReport = ReportHelper.CreateCombinedReport(microserviceReport, monolithReport);
     Console.WriteLine(combinedBenchmarkReport);
-    File.WriteAllText($"../../../combine-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", combinedBenchmarkReport);
+    File.WriteAllText($"../../../../Reports/combine-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", combinedBenchmarkReport);
 
     Thread.Sleep(ITERATION_THROTTLE);
 }
@@ -50,4 +50,4 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
 // TODO: Create the final report
 string finalBenchmarkReport = ReportHelper.CreateFinalReport();
 Console.WriteLine(finalBenchmarkReport);
-File.WriteAllText($"../../../final-report_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", finalBenchmarkReport);
+File.WriteAllText($"../../../../Reports/final-report_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", finalBenchmarkReport);

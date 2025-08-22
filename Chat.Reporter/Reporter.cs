@@ -14,22 +14,22 @@ public class Reporter {
     public void Run() {
         var unIndexes = dataCollection
             .Query()
-            .Select(x => x.runIndexIdentifier)
+            .Select(x => x.RunIndexIdentifier)
             .ToEnumerable()
             .Distinct()
             .ToList();
         var nidx = 1;
         Console.WriteLine("index;endpoint;duration;count;avgDuration;minDuration;maxDuration");
         foreach (var idx in unIndexes) {
-            var reportData = dataCollection.Find(x => x.runIndexIdentifier == idx).ToList();
+            var reportData = dataCollection.Find(x => x.RunIndexIdentifier == idx).ToList();
             var groupedData = reportData
-                .GroupBy(d => d.endpoint)
+                .GroupBy(d => d.Endpoint)
                 .Select(g => new {
                     Endpoint = g.Key,
                     Count = g.Count(),
-                    AvgDuration = g.Average(d => d.durationMs),
-                    MinDuration = g.Min(d => d.durationMs),
-                    MaxDuration = g.Max(d => d.durationMs)
+                    AvgDuration = g.Average(d => d.DurationMs),
+                    MinDuration = g.Min(d => d.DurationMs),
+                    MaxDuration = g.Max(d => d.DurationMs)
                 }).ToList();
 
             foreach (var endpointData in groupedData) {

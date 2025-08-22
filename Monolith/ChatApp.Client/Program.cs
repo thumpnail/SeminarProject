@@ -28,16 +28,16 @@ if (currentReceivers is null || currentReceivers.Length == 0) {
 client.GetWelcomeMessage();
 
 // Get room information
-var roomId = await client.GetRoomAsync(currentUser, currentReceivers);
+var room = await client.GetRoomAsync(currentUser, currentReceivers);
 
 // Get chat history between current user and receiver
-await client.GetChatHistory(roomId);
+await client.GetChatHistory(room.RoomId);
 
 Task.Run(() => {
     while (true) {
         Thread.Sleep(2000);
         // Fetch last messages from the chat history
-        client.FetchLastMessages(roomId);
+        client.FetchLastMessages(room.RoomId);
     }
 });
 
@@ -55,7 +55,7 @@ do {
         // Process the Message and send it to the server
         if (!string.IsNullOrWhiteSpace(input)) {
             // Add Message to chat view or send to server
-            client.SendMessageAsync(new(currentUser, roomId, input, DateTime.UtcNow))
+            client.SendMessageAsync(new(currentUser, room.RoomId, input, DateTime.UtcNow))
                 .ContinueWith(task => {
                     if (!task.Result.Success) {
                         Console.WriteLine("Failed to send Message: " + task.Result.Message);

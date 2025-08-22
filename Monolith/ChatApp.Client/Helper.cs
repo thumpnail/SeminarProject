@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 
 using Chat.Common.Contracts;
+using Chat.Common.Models;
 namespace ChatApp.Client;
 
 public static class Helper {
@@ -12,14 +13,14 @@ public static class Helper {
         }
         if (response.StatusCode == System.Net.HttpStatusCode.RequestTimeout) {
             Console.WriteLine("Request timed out. Please try again later.");
-            return new MessageSendResponseContract("Request timed out.", false);
+            return new MessageSendResponseContract("Request timed out.", false, new BenchmarkTag());
         }
         if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError) {
             Console.WriteLine("Internal server error. Please try again later.");
-            return new MessageSendResponseContract("Internal server error.", false);
+            return new MessageSendResponseContract("Internal server error.", false, new BenchmarkTag());
         }
         Console.WriteLine("System Failed to send Message.");
-        return new MessageSendResponseContract("Failed to send Message.", false);
+        return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag());
     }
 // This method retrieves the welcome Message from the chat service
     public static void GetWelcomeMessage(this HttpClient httpClient) {
@@ -30,21 +31,21 @@ public static class Helper {
             Console.WriteLine("Error connecting to the chat service");
         }
     }
-    public static async Task<string> GetRoomAsync(this HttpClient client, string sender, string[] receivers) {
+    public static async Task<RoomRetrieveResponseContract> GetRoomAsync(this HttpClient client, string sender, string[] receivers) {
         var roomResponse = await client.PostAsJsonAsync("/room",
-        new RoomRetrieveContract(sender, receivers));
+            new RoomRetrieveContract(sender, receivers));
 
         if (roomResponse.IsSuccessStatusCode) {
             var room = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
             if (room is { RoomId: not null }) {
                 Console.WriteLine($"Room ID: {room.RoomId}");
-                return room.RoomId;
+                return room;
             }
         }
         Console.WriteLine("Failed to retrieve room information.");
-        return null;
+        return new RoomRetrieveResponseContract(false, "Failed to retrieve room information", null, new BenchmarkTag());
     }
-    public static async Task FetchLastMessages(this HttpClient client, string roomId) {
+    public static async Task<HistoryResponseContract> FetchLastMessages(this HttpClient client, string roomId) {
         var historyRetrieveContract = new HistoryRetrieveContract(roomId, lastMessageTimestamp, -1);
         lastMessageTimestamp = DateTime.Now;
         var historyResponse = await client.PostAsJsonAsync("/history", historyRetrieveContract);
@@ -54,11 +55,13 @@ public static class Helper {
                 foreach (var message in history.Messages) {
                     Console.WriteLine($"{message.Content}");
                 }
+                return history;
             }
         }
+        return new HistoryResponseContract([], false, new BenchmarkTag());
     }
 
-    public static async Task GetChatHistory(this HttpClient client, string roomId) {
+    public static async Task<HistoryResponseContract> GetChatHistory(this HttpClient client, string roomId) {
         // Fetch the last messages from the chat history
         lastMessageTimestamp = DateTime.Now.AddDays(-1);
         // Retrieve the chat history for the room
@@ -72,11 +75,12 @@ public static class Helper {
                     lastMessageTimestamp = message.Timestamp;
                     Console.WriteLine($"{message?.SendingUser?.Username}: {message?.Content}");
                 }
-            } else {
-                Console.WriteLine("No chat history found.");
+                return history;
             }
+            Console.WriteLine("No chat history found.");
         } else {
             Console.WriteLine("Failed to retrieve chat history.");
         }
+        return new HistoryResponseContract([], false, new BenchmarkTag());
     }
 }

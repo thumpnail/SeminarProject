@@ -2,5 +2,5 @@
 
 public abstract class ATester {
     public abstract void Run();
-    public abstract string Report();
+    public abstract BenchmarkReport Report(out string reportResult);
 }

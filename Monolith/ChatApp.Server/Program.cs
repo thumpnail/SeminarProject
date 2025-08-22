@@ -1,13 +1,17 @@
-﻿using Chat.Common;
+﻿using System.Diagnostics;
+
+using Chat.Common;
 using Chat.Common.Contracts;
 using Chat.Common.Models;
 
 using ChatApp.Server.Services;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,78 +19,80 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 //builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<DatabaseService>();
-
-
 var app = builder.Build();
 
 // Optional: Swagger UI
 if (app.Environment.IsDevelopment()) {
-	//app.UseSwagger();
-	//app.UseSwaggerUI();
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
 }
+
+Database Database = new();
 
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
 
-app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract, DatabaseService db) => {
+app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
     Thread.Sleep(10);
-    // get user reference
-    User user;
-    user = db.usersCollection.FindOne(u => u.Username.Equals(messageSendContract.Sender));
+    var start = Stopwatch.StartNew();
+    Database.InsertMessage(messageSendContract);
+    start.Stop();
 
-    // get room reference
-    ChatRoom room;
-    room = db.roomCollection.FindOne(r => r.Id.Equals(messageSendContract.RoomId));
-    // add Message to the room
-    var message = new Message {
-        Id = Guid.NewGuid().ToString(),
-        SendingUser = user,
-        ChatRoom = room,
-        Content = messageSendContract.Content,
-        Timestamp = DateTime.UtcNow
-    };
-    db.messagesCollection.Insert(message);
-    room.Messages.Add(message);
-    db.roomCollection.Update(room);
+    // benchmarking
+    var subTag = new BenchmarkSubTag(
+        "Monolith/send",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = new BenchmarkTag();
+    newTag.SubTags.Add(subTag);
 
-    // update collections
-
-    return Results.Json(new MessageSendResponseContract(messageSendContract.Content, true));
+    return Results.Json(new MessageSendResponseContract(
+        messageSendContract.Content,
+        true,
+        newTag));
 });
 
-app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContract, DatabaseService db) => {
+app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContract) => {
     Thread.Sleep(10);
-    ChatRoom room;
-    room = db.roomCollection.FindOne(r => r.Id.Equals(historyRetrieveContract.RoomId));
+    var start = Stopwatch.StartNew();
+    var response = Database.GetMessages(historyRetrieveContract);
+    start.Stop();
 
-    List<Message> messages = new();
-    messages = db.messagesCollection
-            .Query()
-            .Where(x=>x.ChatRoom.Id.Equals(room.Id) && x.Timestamp > historyRetrieveContract.StartDate)
-            //.Include(m => m.ChatRoom)
-            //.Include(m => m.ChatRoom.Users)
-            //.Include(m => m.SendingUser)
-            .Limit(historyRetrieveContract.Limit)
-            .ToList();
+    // benchmarking
+    var subTag = new BenchmarkSubTag(
+        "Monolith/history",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = new BenchmarkTag();
+    newTag.SubTags.Add(subTag);
 
-    return Results.Json(new HistoryResponseContract(messages, true));
+    return Results.Json(response with {
+        Tag = newTag,
+    });
 });
 
-app.MapPost("/room", ([FromBody] RoomRetrieveContract roomRetrieveContract, DatabaseService db) => {
+app.MapPost("/room", ([FromBody] RoomRetrieveContract roomRetrieveContract) => {
     Thread.Sleep(10);
-    List<string> usernames = [roomRetrieveContract.Sender];
-    usernames.AddRange(roomRetrieveContract.Receivers);
+    var start = Stopwatch.StartNew();
+    var response = Database.GetRoom(roomRetrieveContract);
+    start.Stop();
 
-    var users = db.GetOrCreateUsers(usernames);
+    var subTag = new BenchmarkSubTag(
+        "Monolith/room",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = new BenchmarkTag();
+    newTag.SubTags.Add(subTag);
 
-    var expectedChatRoomID = db.GetComparableRoomId(users);
-
-    // ERROR: creates allways a new room
-    var room = db.GetOrCreateRoom(expectedChatRoomID);
-
-    db.UpdateRoomWithUsers(room, users);
-    return Results.Json(new RoomRetrieveResponseContract(true, RoomId:room.Id));
+    return Results.Json(response with {
+        Tag = newTag
+    });
 });
 
 // Run the web server

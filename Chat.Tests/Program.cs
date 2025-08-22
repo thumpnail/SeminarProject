@@ -1,22 +1,53 @@
-﻿using Chat.Tests;
+﻿using BetterConsoles.Tables.Configuration;
+
+using Chat.Tests;
 
 const string connectionString = "../../../benchmark-1.db";
-const int maxThreads = 1000;
-const int maxMessages = 1;
 
-const int threadThrottle = 100;
+if (File.Exists(connectionString)) {
+    File.Delete(connectionString);
+}
 
-var microserviceTester = new ChatMicroserviceATester(connectionString,maxThreads,maxMessages,threadThrottle);
-microserviceTester.Run();
+const int MAX_ITERATIONS = 10;
+const int ITERATION_THROTTLE = 100; // 1 second
 
-var monolithTester = new ChatMonolithATester(connectionString,maxThreads,maxMessages,threadThrottle);
-monolithTester.Run();
+const int MAX_THREADS = 5;
+const int MAX_MESSAGES = 5;
 
-Console.WriteLine("\n\n-- Benchmark Results --\n");
-var microserviceReport = microserviceTester.Report();
-Console.WriteLine(microserviceReport);
-File.WriteAllLinesAsync($"../../../microservice-report{DateTime.UtcNow.ToString().Replace(':','-')}.txt", microserviceReport.Split('\n'));
+const int THREAD_THROTTLE = 100;
 
-var monolithReport = monolithTester.Report();
-Console.WriteLine(monolithReport);
-File.WriteAllLinesAsync($"../../../monolith-report{DateTime.UtcNow.ToString().Replace(':','-')}.txt", monolithReport.Split('\n'));
+var ReportHelper = new ReportHelper();
+
+for (int i = 0; i < MAX_ITERATIONS; i++) {
+    var microserviceTester = new ChatMicroserviceATester(connectionString, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE);
+    var monolithTester = new ChatMonolithATester(connectionString, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE);
+
+    ReportHelper.SetActive(microserviceTester, monolithTester);
+
+
+    microserviceTester.Run();
+    // TODO: Create a report for microserviceTester(Atom/Single/Sub)
+    var microserviceBenchmarkReport = ReportHelper.CreateReport(microserviceTester, out var microserviceReport);
+    Console.WriteLine(microserviceReport);
+    File.WriteAllLinesAsync($"../../../microservice-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", microserviceBenchmarkReport.Split('\n'));
+
+    monolithTester.Run();
+    // TODO: Create a report for monolithTester(Atom/Single/Sub)
+    var monolithBenchmarkReport = ReportHelper.CreateReport(monolithTester, out var monolithReport);
+    Console.WriteLine(monolithReport);
+    File.WriteAllLinesAsync($"../../../monolith-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", monolithBenchmarkReport.Split('\n'));
+
+
+
+    // TODO: Create a combined/full report / Based on ReportHelper.Active
+    var combinedBenchmarkReport = ReportHelper.CreateCombinedReport(microserviceReport, monolithReport);
+    Console.WriteLine(combinedBenchmarkReport);
+    File.WriteAllText($"../../../combine-report-{i}_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", combinedBenchmarkReport);
+
+    Thread.Sleep(ITERATION_THROTTLE);
+}
+
+// TODO: Create the final report
+string finalBenchmarkReport = ReportHelper.CreateFinalReport();
+Console.WriteLine(finalBenchmarkReport);
+File.WriteAllText($"../../../final-report_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", finalBenchmarkReport);

@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 
 using Chat.Common;
 using Chat.Common.Contracts;
@@ -37,27 +38,54 @@ if (app.Environment.IsDevelopment()) {
 app.MapGet("/", () => "Type=ChatMessagingService");
 // receive a Message
 app.MapPost("/send", async ([FromBody] MessageSendContract msgSend) => {
+    var start = Stopwatch.StartNew();
     var response = await dbClient.PostAsJsonAsync("/insertMessage", msgSend);
 
     var msgSendResponse = await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
 
     if (msgSendResponse is null) {
-        return Results.Json(new MessageSendResponseContract("Failed to send Message", false));
+        return Results.Json(new MessageSendResponseContract("Failed to send Message", false, msgSendResponse.Tag));
     }
+    start.Stop();
 
-    return Results.Json(msgSendResponse);
+    var subTag = new BenchmarkSubTag(
+        "Microservice/MessagingService/send",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = msgSendResponse.Tag;
+    newTag.SubTags.Add(subTag);
+
+    return Results.Json(msgSendResponse with {
+        Tag = newTag
+    });
 });
 // create a room
 app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
+    var start = Stopwatch.StartNew();
     var roomResponse = await dbClient.PostAsJsonAsync("/getroom",
     new RoomRetrieveContract(room.Sender, room.Receivers));
 
     var parsedRoom = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
 
     if (parsedRoom == null) {
-        return Results.Json(new RoomRetrieveResponseContract(false, Message:"Failed to retrieve room"));
+        return Results.Json(new RoomRetrieveResponseContract(false, Message:"Failed to retrieve room", null, parsedRoom.Tag));
     }
-    return Results.Json(new RoomRetrieveResponseContract(parsedRoom.Success, parsedRoom.Message, parsedRoom.RoomId));
+    start.Stop();
+
+    var subTag = new BenchmarkSubTag(
+        "Microservice/MessagingService/room",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = parsedRoom.Tag;
+    newTag.SubTags.Add(subTag);
+
+    return Results.Json(parsedRoom with {
+        Tag = newTag
+    });
 });
 
 // Run the web server

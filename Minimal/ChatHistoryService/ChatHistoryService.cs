@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Diagnostics;
+using System.Net.Http.Json;
 
 using Chat.Common.Contracts;
 using Chat.Common.Models;
@@ -26,6 +27,7 @@ if (app.Environment.IsDevelopment()) { }
 // Beispiel-Endpunkt
 app.MapGet("/", () => "Type=ChatHistoryService");
 app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContract) => {
+    var start = Stopwatch.StartNew();
     // Hier könnte Logik zum Abrufen der ChatRoom-Historie stehen
     // TODO: call DB Service to get messages for room and time range
 
@@ -33,7 +35,20 @@ app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContrac
 
     var response = await DBResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
 
-    return Results.Json(response);
+    start.Stop();
+
+    var subTag = new BenchmarkSubTag(
+        "Microservice/History/history",
+        start.ElapsedMilliseconds,
+        GC.GetAllocatedBytesForCurrentThread(),
+        GC.GetTotalAllocatedBytes()
+    );
+    var newTag = response.Tag;
+    newTag.SubTags.Add(subTag);
+
+    return Results.Json(response with {
+        Tag = newTag
+    });
 });
 
 app.Run(Chat.Common.Addresses.CHAT_HISTORY_SERVICE);

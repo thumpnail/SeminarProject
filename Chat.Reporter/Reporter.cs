@@ -34,7 +34,7 @@ public class Reporter {
 
             foreach (var endpointData in groupedData) {
                 //Console.WriteLine($"Endpoint: {endpointData.Endpoint}");
-                //Console.WriteLine($"  Requests: {endpointData.Count}");
+                //Console.WriteLine($"  Requests: {endpointData.IterationsCount}");
                 //Console.WriteLine($"  Avg Duration: {endpointData.AvgDuration:F2} ms");
                 //Console.WriteLine($"  Min Duration: {endpointData.MinDuration:F2} ms");
                 //Console.WriteLine($"  Max Duration: {endpointData.MaxDuration:F2} ms");

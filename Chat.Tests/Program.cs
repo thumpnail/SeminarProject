@@ -9,10 +9,10 @@ if (File.Exists(connectionString)) {
 }
 
 const int MAX_ITERATIONS = 10;
-const int ITERATION_THROTTLE = 100; // 1 second
+const int ITERATION_THROTTLE = 100;
 
-const int MAX_THREADS = 5;
-const int MAX_MESSAGES = 5;
+const int MAX_THREADS = 10;
+const int MAX_MESSAGES = 25;
 
 const int THREAD_THROTTLE = 100;
 

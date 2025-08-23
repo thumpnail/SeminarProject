@@ -8,11 +8,11 @@ if (File.Exists(connectionString)) {
     File.Delete(connectionString);
 }
 
-const int MAX_ITERATIONS = 10;
+const int MAX_ITERATIONS = 5;
 const int ITERATION_THROTTLE = 100;
 
-const int MAX_THREADS = 10;
-const int MAX_MESSAGES = 25;
+const int MAX_THREADS = 5;
+const int MAX_MESSAGES = 15;
 
 const int THREAD_THROTTLE = 100;
 

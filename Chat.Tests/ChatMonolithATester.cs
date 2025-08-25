@@ -6,10 +6,10 @@ using ChatApp.Client;
 using LiteDB;
 namespace Chat.Tests {
     public class ChatMonolithATester : BenchmarkTesterBase {
-        public ChatMonolithATester(string connectionString, int maxThreads, int maxMessages, int threadThrottle)
-            : base(connectionString, maxThreads, maxMessages, threadThrottle) {}
+        public ChatMonolithATester(IBenchmarkDatabase benchmarkDatabase, int maxThreads, int maxMessages, int threadThrottle)
+            : base(benchmarkDatabase, maxThreads, maxMessages, threadThrottle) {}
 
-        protected override void ExecuteBenchmarkThread(ILiteCollection<Data> benchmarkDataCollection) {
+        protected override void ExecuteBenchmarkThread(IBenchmarkDatabase benchmarkDataCollection) {
             var client = new HttpClient {
                 BaseAddress = new(Chat.Common.Addresses.CHAT_MONOLITH_SERVICE),
                 Timeout = TimeSpan.FromSeconds(200)
@@ -19,7 +19,7 @@ namespace Chat.Tests {
             if (sender == receiver) return;
 
             // Get room information
-            string roomId = GetRoomInformation(benchmarkDataCollection, "monolith", "/room", client, sender, receiver, out DateTime getRoomStart, out float roomDuration, out BenchmarkTag roomTags);
+            string roomId = GetRoomInformationAsync(benchmarkDataCollection, "monolith", "/room", client, sender, receiver, out DateTime getRoomStart, out float roomDuration, out BenchmarkTag roomTags);
 
             // Get chat history
             GetChatHistory(benchmarkDataCollection, "microservice", "/history", client, roomId, sender, receiver, out DateTime getHistoryStart, out float historyDuration, out BenchmarkTag historyTags);

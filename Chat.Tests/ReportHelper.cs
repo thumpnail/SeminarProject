@@ -48,12 +48,12 @@ public class ReportHelper {
     //    sb.AppendLine("\n\n-- Benchmark Results --\n");
     //    microserviceReport = activeMicroserviceTester.Report(out BenchmarkReport microserviceBenchmarkReport);
     //    sb.AppendLine(microserviceReport);
-    //    File.WriteAllLinesAsync($"../../../microservice-report_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", microserviceReport.Split('\n'));
+    //    File.WriteAllLinesAsync($"../../../microservice-report_{DateTime.Now.ToString().Replace(':', '-')}.txt", microserviceReport.Split('\n'));
     //    sb.AppendLine(microserviceReport + "\n");
     //
     //    monolithReport = activeMonolithTester.Report(out BenchmarkReport monolithBenchmarkReport);
     //    sb.AppendLine(monolithReport);
-    //    File.WriteAllLinesAsync($"../../../monolith-report_{DateTime.UtcNow.ToString().Replace(':', '-')}.txt", monolithReport.Split('\n'));
+    //    File.WriteAllLinesAsync($"../../../monolith-report_{DateTime.Now.ToString().Replace(':', '-')}.txt", monolithReport.Split('\n'));
     //    sb.AppendLine(monolithReport + "\n");
     //
     //    var both = new List<BenchmarkReport>();
@@ -70,30 +70,32 @@ public class ReportHelper {
         var allMicroserviceReports = microserviceTester.Select(t => t.Report(out _)).ToList();
         var allMonolithReports = monolithTester.Select(t => t.Report(out _)).ToList();
 
+        // ERROR: Exception when there is only data with the value of 0
+        //
         var microserviceFullReport = allMicroserviceReports.SelectMany(x => x.SubReports)
             .GroupBy(x => x.Endpoint)
             .Select(g => new FullReportModel {
                 Endpoint = g.Key,
                 Count = g.Count(),
                 ServerType = "microservice",
-                MinMinDuration = g.Where(x => x.MinDurationMs > 0).Min(d => d.MinDurationMs),
-                MinAvgDuration = g.Where(x => x.MinDurationMs > 0).Average(d => d.MinDurationMs),
-                MinMaxDuration = g.Where(x => x.MinDurationMs > 0).Max(d => d.MinDurationMs),
-                AvgMinDuration = g.Where(x => x.AvgDurationMs > 0).Min(d => d.AvgDurationMs),
-                AvgAvgDuration = g.Where(x => x.AvgDurationMs > 0).Average(d => d.AvgDurationMs),
-                AvgMaxDuration = g.Where(x => x.AvgDurationMs > 0).Max(d => d.AvgDurationMs),
-                MaxMinDuration = g.Where(x => x.MaxDurationMs > 0).Min(d => d.MaxDurationMs),
-                MaxAvgDuration = g.Where(x => x.MaxDurationMs > 0).Average(d => d.MaxDurationMs),
-                MaxMaxDuration = g.Where(x => x.MaxDurationMs > 0).Max(d => d.MaxDurationMs),
-                MinMinAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Min(d => d.MinAllocatedBytes),
-                MinAvgAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Average(d => d.MinAllocatedBytes),
-                MinMaxAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Max(d => d.MinAllocatedBytes),
-                AvgMinAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Min(d => d.AvgAllocatedBytes),
-                AvgAvgAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Average(d => d.AvgAllocatedBytes),
-                AvgMaxAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Max(d => d.AvgAllocatedBytes),
-                MaxMinAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Min(d => d.MaxAllocatedBytes),
-                MaxAvgAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Average(d => d.MaxAllocatedBytes),
-                MaxMaxAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Max(d => d.MaxAllocatedBytes),
+                MinMinDuration = g.Min(d => d.MinDurationMs),
+                MinAvgDuration = g.Average(d => d.MinDurationMs),
+                MinMaxDuration = g.Max(d => d.MinDurationMs),
+                AvgMinDuration = g.Min(d => d.AvgDurationMs),
+                AvgAvgDuration = g.Average(d => d.AvgDurationMs),
+                AvgMaxDuration = g.Max(d => d.AvgDurationMs),
+                MaxMinDuration = g.Min(d => d.MaxDurationMs),
+                MaxAvgDuration = g.Average(d => d.MaxDurationMs),
+                MaxMaxDuration = g.Max(d => d.MaxDurationMs),
+                MinMinAllocatedBytes = g.Min(d => d.MinAllocatedBytes),
+                MinAvgAllocatedBytes = g.Average(d => d.MinAllocatedBytes),
+                MinMaxAllocatedBytes = g.Max(d => d.MinAllocatedBytes),
+                AvgMinAllocatedBytes = g.Min(d => d.AvgAllocatedBytes),
+                AvgAvgAllocatedBytes = g.Average(d => d.AvgAllocatedBytes),
+                AvgMaxAllocatedBytes = g.Max(d => d.AvgAllocatedBytes),
+                MaxMinAllocatedBytes = g.Min(d => d.MaxAllocatedBytes),
+                MaxAvgAllocatedBytes = g.Average(d => d.MaxAllocatedBytes),
+                MaxMaxAllocatedBytes = g.Max(d => d.MaxAllocatedBytes),
             }).ToList();
         var monolithFullReport = allMonolithReports.SelectMany(x => x.SubReports)
             .GroupBy(x => x.Endpoint)
@@ -102,24 +104,24 @@ public class ReportHelper {
                 Count = g.Count(),
                 ServerType = "monolith",
                 // Min
-                MinMinDuration = g.Where(x => x.MinDurationMs > 0).Min(d => d.MinDurationMs),
-                MinAvgDuration = g.Where(x => x.MinDurationMs > 0).Average(d => d.MinDurationMs),
-                MinMaxDuration = g.Where(x => x.MinDurationMs > 0).Max(d => d.MinDurationMs),
-                AvgMinDuration = g.Where(x => x.AvgDurationMs > 0).Min(d => d.AvgDurationMs),
-                AvgAvgDuration = g.Where(x => x.AvgDurationMs > 0).Average(d => d.AvgDurationMs),
-                AvgMaxDuration = g.Where(x => x.AvgDurationMs > 0).Max(d => d.AvgDurationMs),
-                MaxMinDuration = g.Where(x => x.MaxDurationMs > 0).Min(d => d.MaxDurationMs),
-                MaxAvgDuration = g.Where(x => x.MaxDurationMs > 0).Average(d => d.MaxDurationMs),
-                MaxMaxDuration = g.Where(x => x.MaxDurationMs > 0).Max(d => d.MaxDurationMs),
-                MinMinAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Min(d => d.MinAllocatedBytes),
-                MinAvgAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Average(d => d.MinAllocatedBytes),
-                MinMaxAllocatedBytes = g.Where(x => x.MinAllocatedBytes > 0).Max(d => d.MinAllocatedBytes),
-                AvgMinAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Min(d => d.AvgAllocatedBytes),
-                AvgAvgAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Average(d => d.AvgAllocatedBytes),
-                AvgMaxAllocatedBytes = g.Where(x => x.AvgAllocatedBytes > 0).Max(d => d.AvgAllocatedBytes),
-                MaxMinAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Min(d => d.MaxAllocatedBytes),
-                MaxAvgAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Average(d => d.MaxAllocatedBytes),
-                MaxMaxAllocatedBytes = g.Where(x => x.MaxAllocatedBytes > 0).Max(d => d.MaxAllocatedBytes),
+                MinMinDuration = g.Min(d => d.MinDurationMs),
+                MinAvgDuration = g.Average(d => d.MinDurationMs),
+                MinMaxDuration = g.Max(d => d.MinDurationMs),
+                AvgMinDuration = g.Min(d => d.AvgDurationMs),
+                AvgAvgDuration = g.Average(d => d.AvgDurationMs),
+                AvgMaxDuration = g.Max(d => d.AvgDurationMs),
+                MaxMinDuration = g.Min(d => d.MaxDurationMs),
+                MaxAvgDuration = g.Average(d => d.MaxDurationMs),
+                MaxMaxDuration = g.Max(d => d.MaxDurationMs),
+                MinMinAllocatedBytes = g.Min(d => d.MinAllocatedBytes),
+                MinAvgAllocatedBytes = g.Average(d => d.MinAllocatedBytes),
+                MinMaxAllocatedBytes = g.Max(d => d.MinAllocatedBytes),
+                AvgMinAllocatedBytes = g.Min(d => d.AvgAllocatedBytes),
+                AvgAvgAllocatedBytes = g.Average(d => d.AvgAllocatedBytes),
+                AvgMaxAllocatedBytes = g.Max(d => d.AvgAllocatedBytes),
+                MaxMinAllocatedBytes = g.Min(d => d.MaxAllocatedBytes),
+                MaxAvgAllocatedBytes = g.Average(d => d.MaxAllocatedBytes),
+                MaxMaxAllocatedBytes = g.Max(d => d.MaxAllocatedBytes),
             }).ToList();
 
         var table = new BetterConsoles.Tables.Table(TableConfig.Unicode());

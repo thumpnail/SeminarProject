@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-public class BenchmarkReport {
+﻿public class BenchmarkReport {
     public string RunIndexIdentifier { get; set; }
     public int ThreadCount { get; set; }
     public int MsgCount { get; set; }
@@ -9,6 +7,7 @@ public class BenchmarkReport {
     public DateTime EndTime { get; set; }
     public string ServiceType { get; set; }
     public double Duration { get; set; }
+    public int InvalidStatusCodeCount { get; set; } // Added property to track invalid HTTP status codes
 
     public List<BenchmarkSubReport> SubReports { get; set; } = new List<BenchmarkSubReport>();
 }

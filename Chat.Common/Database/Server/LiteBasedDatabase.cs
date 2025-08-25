@@ -4,30 +4,27 @@ using Chat.Common.Models;
 using LiteDB;
 namespace Chat.Common;
 
-public interface IDatabase {
-
-    public List<User> GetOrCreateUsers(List<string> usernames);
-    public ChatRoom GetOrCreateRoom(string expectedChatRoomID);
-    public void UpdateRoomWithUsers(ChatRoom room, List<User> users);
-    public string GetComparableRoomId(List<User> userList);
-}
-
-public class Database : IDatabase {
-    private string _databasePath = "./chat.db";
-    private LiteDatabase db;
-
+/// <summary>
+/// Datenbank-Implementierung auf Basis von LiteDB.
+/// Persistiert Nachrichten, Benutzer und Räume lokal als Datei.
+/// </summary>
+public class LiteBasedDatabase : IDatabase {
     private ILiteCollection<ChatRoom> roomCollection;
     private ILiteCollection<User> usersCollection;
     private ILiteCollection<Message> messagesCollection;
 
-    public Database(string databasePath = "./chat.db") {
-        _databasePath = databasePath;
-        db = new LiteDatabase(_databasePath);
-        roomCollection = db.GetCollection<ChatRoom>(CollectionName.ROOMS);
-        usersCollection = db.GetCollection<User>(CollectionName.USERS);
-        messagesCollection = db.GetCollection<Message>(CollectionName.MESSAGES);
+    /// <summary>
+    /// Initialisiert die LiteDB-Datenbank und Collections.
+    /// </summary>
+    /// <param name="databasePath">Pfad zur Datenbankdatei</param>
+    public LiteBasedDatabase(string databasePath = "./chat.db") {
+        LiteDatabase db1 = new(databasePath);
+        roomCollection = db1.GetCollection<ChatRoom>(CollectionName.ROOMS);
+        usersCollection = db1.GetCollection<User>(CollectionName.USERS);
+        messagesCollection = db1.GetCollection<Message>(CollectionName.MESSAGES);
     }
 
+    /// <inheritdoc/>
     public MessageSendResponseContract InsertMessage(MessageSendContract messageSendContract) {
         var user = usersCollection.FindOne(x=>x.Username.Equals(messageSendContract.Sender));
         // get room reference
@@ -38,7 +35,7 @@ public class Database : IDatabase {
             SendingUser = user,
             ChatRoom = room,
             Content = messageSendContract.Content,
-            Timestamp = DateTime.UtcNow
+            Timestamp = DateTime.Now
         };
         messagesCollection.Insert(message);
         room.Messages.Add(message);
@@ -46,22 +43,20 @@ public class Database : IDatabase {
         roomCollection.Update(room);
         messagesCollection.Update(message);
 
-        return new MessageSendResponseContract(message.Content, true, null);
+        return new MessageSendResponseContract(message.Content, true, new());
     }
 
+    /// <inheritdoc/>
     public HistoryResponseContract GetMessages(HistoryRetrieveContract historyRetrieveContract) {
         var room = roomCollection.FindOne(r => r.Id.Equals(historyRetrieveContract.RoomId));
 
         var messages = messagesCollection
-            //.Include(m=>m.ChatRoom)
-            //.Include(m => m.ChatRoom.Users)
-            //.Include(m => m.SendingUser)
             .Find(x => x.ChatRoom.Id.Equals(historyRetrieveContract.RoomId))
             .Where(x => x.Timestamp > historyRetrieveContract.StartDate)
             .ToList();
-        return new HistoryResponseContract(messages, true, null);
+        return new HistoryResponseContract(messages, true, new());
     }
-
+    /// <inheritdoc/>
     public List<User> GetOrCreateUsers(params List<string> usernames) {
         var users = new List<User>();
         foreach (var username in usernames) {
@@ -82,7 +77,7 @@ public class Database : IDatabase {
         }
         return users;
     }
-
+    /// <inheritdoc/>
     public ChatRoom GetOrCreateRoom(string expectedChatRoomID) {
         // Check if the room already exists
         var room = roomCollection.FindOne(r => r.Id.Equals(expectedChatRoomID));
@@ -97,7 +92,7 @@ public class Database : IDatabase {
         }
         return room;
     }
-
+    /// <inheritdoc/>
     public void UpdateRoomWithUsers(ChatRoom room, List<User> users) {
         // Füge nur Benutzer hinzu, die noch nicht im Raum sind
         room.Users = users.Where(u => room.Users.All(existing => existing.Id != u.Id)).Concat(room.Users).ToList();
@@ -110,9 +105,9 @@ public class Database : IDatabase {
         // Update the users in the database
         usersCollection.Update(users);
     }
-
+    /// <inheritdoc/>
     public string GetComparableRoomId(List<User> userList) => string.Join("-", userList.Select(r => r.Id).OrderBy(r => r));
-
+    /// <inheritdoc/>
     public RoomRetrieveResponseContract GetRoom(RoomRetrieveContract roomRetrieveContract) {
         List<string> usernames = [roomRetrieveContract.Sender];
         usernames.AddRange(roomRetrieveContract.Receivers);
@@ -126,6 +121,6 @@ public class Database : IDatabase {
 
         UpdateRoomWithUsers(room, users);
 
-        return new RoomRetrieveResponseContract(true, null, RoomId: room.Id, null);
+        return new RoomRetrieveResponseContract(true, string.Empty, RoomId: room.Id, new());
     }
 }

@@ -7,11 +7,11 @@ using ChatApp.Client;
 using LiteDB;
 namespace Chat.Tests {
     public class ChatMicroserviceATester : BenchmarkTesterBase {
-        public ChatMicroserviceATester(string connectionString, int maxThreads, int maxMessages, int threadThrottle)
-            : base(connectionString, maxThreads, maxMessages, threadThrottle) {
+        public ChatMicroserviceATester(IBenchmarkDatabase benchmarkDatabase, int maxThreads, int maxMessages, int threadThrottle)
+            : base(benchmarkDatabase, maxThreads, maxMessages, threadThrottle) {
         }
 
-        protected override void ExecuteBenchmarkThread(ILiteCollection<Data> benchmarkDataCollection) {
+        protected override void ExecuteBenchmarkThread(IBenchmarkDatabase benchmarkDatabase) {
             Console.WriteLine($"Executing benchmark thread for {GetType().Name}...");
             var messagingClient = new HttpClient {
                 BaseAddress = new(Chat.Common.Addresses.CHAT_MESSAGING_SERVICE),
@@ -31,7 +31,7 @@ namespace Chat.Tests {
             Console.WriteLine("Retrieving room information...");
             // Get room information
             var room =
-                GetRoomInformation(benchmarkDataCollection,
+                GetRoomInformationAsync(benchmarkDatabase,
                     "microservice",
                     "/room",
                     messagingClient,
@@ -42,7 +42,7 @@ namespace Chat.Tests {
 
             Console.WriteLine("Getting Chat History...");
             // Get chat history
-            GetChatHistory(benchmarkDataCollection,
+            GetChatHistory(benchmarkDatabase,
                 "microservice",
                 "/history",
                 historyClient, room,
@@ -54,7 +54,7 @@ namespace Chat.Tests {
             Console.WriteLine("Sending messages...");
             // Send messages
             for (int msgIdx = 0; msgIdx < msgCount; msgIdx++) {
-                SendMessage(benchmarkDataCollection,
+                SendMessage(benchmarkDatabase,
                     "microservice",
                     "/send",
                     messagingClient,

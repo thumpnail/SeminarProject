@@ -178,13 +178,13 @@ public abstract class BenchmarkTesterBase : ATester {
         room.Wait();
         if (room.IsCanceled) {
             Console.WriteLine("GetRoomAsync was canceled unexpected.");
-            tag = new((int)HttpStatusCode.InternalServerError);
+            tag = new();
             roomDuration = 0f;
             return null!;
         }
         if (room.IsFaulted) {
             Console.WriteLine("GetRoomAsync encountered an error: " + room.Exception?.Message);
-            tag = new((int)HttpStatusCode.InternalServerError);
+            tag = new();
             roomDuration = 0f;
             return null!;
         }
@@ -205,7 +205,7 @@ public abstract class BenchmarkTesterBase : ATester {
             tag = room.Result.Tag;
             return room.Result.RoomId;
         }
-        tag = new((int)HttpStatusCode.InternalServerError);
+        tag = new();
         roomDuration = -1f;
         return null!;
     }

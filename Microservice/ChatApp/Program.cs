@@ -80,7 +80,7 @@ async Task<MessageSendResponseContract> SendMessageAsync(MessageSendContract mes
         return await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
     }
     Console.WriteLine("System Failed to send Message.");
-    return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag((int)response.StatusCode));
+    return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag());
 }
 // This method retrieves the welcome Message from the chat service
 void GetWelcomeMessage(HttpClient httpClient) {

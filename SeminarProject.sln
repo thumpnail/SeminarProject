@@ -4,19 +4,30 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monolith", "Monolith", "{EE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3D21D713-2664-40F4-A183-806076312397}"
 	ProjectSection(SolutionItems) = preProject
-		compose.yaml = compose.yaml
-		Minimal\ChatDatabaseService\bin\Debug\net9.0\chat-log.db = Minimal\ChatDatabaseService\bin\Debug\net9.0\chat-log.db
+		Dokumentation\API-Referenz.md = Dokumentation\API-Referenz.md
+		Dokumentation\Architektur.md = Dokumentation\Architektur.md
+		Dokumentation\Benchmarking.md = Dokumentation\Benchmarking.md
+		Dokumentation\Changelog.md = Dokumentation\Changelog.md
+		Dokumentation\Projektübersicht.md = Dokumentation\Projektübersicht.md
+		Dokumentation\README.md = Dokumentation\README.md
+		Dokumentation\Setup-Anleitung.md = Dokumentation\Setup-Anleitung.md
+		Tools\analysis.py = Tools\analysis.py
+		Benchmark-Analyse-Bericht.md = Benchmark-Analyse-Bericht.md
+		chat-microservice.db = chat-microservice.db
+		chat-microservice-log.db = chat-microservice-log.db
+		chat-monolith.db = chat-monolith.db
+		chat-monolith-log.db = chat-monolith-log.db
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp", "Minimal\ChatApp\ChatApp.csproj", "{8CA7C8DC-85FA-44C1-B15D-1E55CCAFE8CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp", "Microservice\ChatApp\ChatApp.csproj", "{8CA7C8DC-85FA-44C1-B15D-1E55CCAFE8CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatHistoryService", "Minimal\ChatHistoryService\ChatHistoryService.csproj", "{74A48EF9-5613-4CA7-9E16-F5912C9E8397}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatHistoryService", "Microservice\ChatHistoryService\ChatHistoryService.csproj", "{74A48EF9-5613-4CA7-9E16-F5912C9E8397}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMessagingService", "Minimal\ChatMessagingService\ChatMessagingService.csproj", "{DD6264A5-E5B9-4798-AF75-AE6DE73BE62A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatMessagingService", "Microservice\ChatMessagingService\ChatMessagingService.csproj", "{DD6264A5-E5B9-4798-AF75-AE6DE73BE62A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDatabaseService", "Minimal\ChatDatabaseService\ChatDatabaseService.csproj", "{8FBF8BBB-158F-4EFB-850A-6338761D94CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatDatabaseService", "Microservice\ChatDatabaseService\ChatDatabaseService.csproj", "{8FBF8BBB-158F-4EFB-850A-6338761D94CA}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MicroServices", "MicroServices", "{D8B13BC5-A9E7-4F69-B897-FFB6DB121F08}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microservice", "Microservice", "{D8B13BC5-A9E7-4F69-B897-FFB6DB121F08}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Common", "Chat.Common\Chat.Common.csproj", "{2D3430EC-6C7C-47A1-8F69-EF646365770D}"
 EndProject

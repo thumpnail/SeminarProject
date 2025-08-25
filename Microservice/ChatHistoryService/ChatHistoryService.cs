@@ -46,9 +46,11 @@ app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContrac
     var newTag = response.Tag;
     newTag.SubTags.Add(subTag);
 
-    return Results.Json(response with {
+    var newResponse = response with {
         Tag = newTag
-    });
+    };
+
+    return Results.Json<HistoryResponseContract>(newResponse);
 });
 
 app.Run(Chat.Common.Addresses.CHAT_HISTORY_SERVICE);

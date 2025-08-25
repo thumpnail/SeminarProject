@@ -4,8 +4,6 @@ using Chat.Common;
 using Chat.Common.Contracts;
 using Chat.Common.Models;
 
-using ChatApp.Server.Services;
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +25,7 @@ if (app.Environment.IsDevelopment()) {
     //app.UseSwaggerUI();
 }
 
-Database Database = new("../../../../../chat-monolith.db");
+LocalDatabase database = new("../../../../../chat-monolith.db");
 
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
@@ -35,7 +33,7 @@ app.MapGet("/", () => "Type=ChatMessagingService");
 app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
     Thread.Sleep(10);
     var start = Stopwatch.StartNew();
-    Database.InsertMessage(messageSendContract);
+    database.InsertMessage(messageSendContract);
     start.Stop();
 
     // benchmarking
@@ -57,7 +55,7 @@ app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
 app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContract) => {
     Thread.Sleep(10);
     var start = Stopwatch.StartNew();
-    var response = Database.GetMessages(historyRetrieveContract);
+    var response = database.GetMessages(historyRetrieveContract);
     start.Stop();
 
     // benchmarking
@@ -78,7 +76,7 @@ app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContr
 app.MapPost("/room", ([FromBody] RoomRetrieveContract roomRetrieveContract) => {
     Thread.Sleep(10);
     var start = Stopwatch.StartNew();
-    var response = Database.GetRoom(roomRetrieveContract);
+    var response = database.GetRoom(roomRetrieveContract);
     start.Stop();
 
     var subTag = new BenchmarkSubTag(

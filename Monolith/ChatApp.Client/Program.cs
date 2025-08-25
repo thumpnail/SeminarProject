@@ -55,7 +55,7 @@ do {
         // Process the Message and send it to the server
         if (!string.IsNullOrWhiteSpace(input)) {
             // Add Message to chat view or send to server
-            client.SendMessageAsync(new(currentUser, room.RoomId, input, DateTime.UtcNow))
+            client.SendMessageAsync(new(currentUser, room.RoomId, input, DateTime.Now))
                 .ContinueWith(task => {
                     if (!task.Result.Success) {
                         Console.WriteLine("Failed to send Message: " + task.Result.Message);

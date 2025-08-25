@@ -30,57 +30,59 @@ var app = builder.Build();
 // Swagger aktivieren
 if (app.Environment.IsDevelopment()) { }
 
-Database Database = new("../../../../../chat-microservice.db");
+LocalDatabase database = new("../../../../../chat-microservice.db");
 // Beispiel-Endpunkt
 app.MapGet("/", () => "Type=ChatDatabaseService");
 
 app.MapPost("/insertMessage", async ([FromBody] MessageSendContract messageSendContract) => {
     var start = Stopwatch.StartNew();
-    var response = Database.InsertMessage(messageSendContract);
+    var response = database.InsertMessage(messageSendContract);
     start.Stop();
+
+    var tag = new BenchmarkTag([
+        new(
+            "Microservice/ChatDatabaseService/insertMessage",
+            start.ElapsedMilliseconds,
+            GC.GetAllocatedBytesForCurrentThread(),
+            GC.GetTotalAllocatedBytes())
+    ], StatusCodes.Status200OK);
 
     return Results.Json(
         response with {
-            Tag = new BenchmarkTag([
-                new BenchmarkSubTag(
-                    "Microservice/Database/insertMessage",
-                    start.ElapsedMilliseconds,
-                    GC.GetAllocatedBytesForCurrentThread(),
-                    GC.GetTotalAllocatedBytes())
-            ])
+            Tag = tag
         }
     );
 });
 app.MapPost("/getMessages", async ([FromBody] HistoryRetrieveContract historyRetrieveContract) => {
     var start = Stopwatch.StartNew();
-    var response = Database.GetMessages(historyRetrieveContract);
+    var response = database.GetMessages(historyRetrieveContract);
     start.Stop();
 
+    var tag = new BenchmarkTag([
+        new(
+            "Microservice/ChatDatabaseService/getMessages",
+            start.ElapsedMilliseconds,
+            GC.GetAllocatedBytesForCurrentThread(),
+            GC.GetTotalAllocatedBytes())
+    ], StatusCodes.Status200OK);
+
     return Results.Json(response with {
-        Tag = new BenchmarkTag([
-            new BenchmarkSubTag(
-                "Microservice/Database/getMessages",
-                start.ElapsedMilliseconds,
-                GC.GetAllocatedBytesForCurrentThread(),
-                GC.GetTotalAllocatedBytes())
-        ])
+        Tag = tag
     });
 });
 
 app.MapPost("/getroom", async ([FromBody] RoomRetrieveContract roomRetrieveContract) => {
     var start = Stopwatch.StartNew();
-    var response = Database.GetRoom(roomRetrieveContract);
+    var response = database.GetRoom(roomRetrieveContract);
     start.Stop();
+
+    var tag = new BenchmarkTag([
+        new("Microservice/ChatDatabaseService/getroom", start.ElapsedMilliseconds, GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalAllocatedBytes())
+    ], StatusCodes.Status200OK);
 
     return Results.Json(
         response with {
-            Tag = new BenchmarkTag([
-                new BenchmarkSubTag(
-                    "Microservice/Database/getroom",
-                    start.ElapsedMilliseconds,
-                    GC.GetAllocatedBytesForCurrentThread(),
-                    GC.GetTotalAllocatedBytes())
-            ])
+            Tag = tag
         }
     );
 });

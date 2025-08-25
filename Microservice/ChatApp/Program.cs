@@ -58,7 +58,7 @@ do {
         // Process the Message and send it to the server
         if (!string.IsNullOrWhiteSpace(input)) {
             // Add Message to chat view or send to server
-            SendMessageAsync(new(currentUser, roomId, input, DateTime.UtcNow))
+            SendMessageAsync(new(currentUser, roomId, input, DateTime.Now))
                 .ContinueWith((task) => {
                     if (!task.Result.Success) {
                         Console.WriteLine("Failed to send Message: " + task.Result.Message);
@@ -80,7 +80,7 @@ async Task<MessageSendResponseContract> SendMessageAsync(MessageSendContract mes
         return await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
     }
     Console.WriteLine("System Failed to send Message.");
-    return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag());
+    return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag((int)response.StatusCode));
 }
 // This method retrieves the welcome Message from the chat service
 void GetWelcomeMessage(HttpClient httpClient) {

@@ -1,6 +1,10 @@
 ﻿using BetterConsoles.Tables.Configuration;
 
+using Chat.Common;
 using Chat.Tests;
+
+using OxyPlot;
+using OxyPlot.Core.Drawing;
 
 string connectionString = $"../../../../benchmark.db";
 
@@ -8,22 +12,28 @@ if (File.Exists(connectionString)) {
     File.Delete(connectionString);
 }
 
+dynamic cfg = new YamlDotNet.Serialization.Deserializer().Deserialize(File.ReadAllText("../../../../TestConfig.yaml"));
+
 var benchmarkDatabase = new InMemoryBenchmarkDatabase(connectionString);
 
-const int MAX_ITERATIONS = 1;
-const int ITERATION_THROTTLE = 100;
+int MAX_ITERATIONS = int.Parse(cfg["MAX_ITERATIONS"]) ?? 1;
+int ITERATION_THROTTLE = int.Parse(cfg["ITERATION_THROTTLE"]) ?? 0;
 
-const int MAX_THREADS = 10;
-const int MAX_MESSAGES = 100;
+int MAX_THREADS = int.Parse(cfg["MAX_THREADS"]) ?? 100;
+int MAX_MESSAGES = int.Parse(cfg["MAX_MESSAGES"]) ?? 10;
 
-const int THREAD_THROTTLE = 0;
+int THREAD_THROTTLE = int.Parse(cfg["THREAD_THROTTLE"]) ?? 0;
 
 var ReportHelper = new ReportHelper();
 var mainRunTime = DateTime.Now.ToString().Replace(':', '-');
 for (int i = 0; i < MAX_ITERATIONS; i++) {
     var iterationRunTime = DateTime.Now.ToString().Replace(':', '-');
-    var microserviceTester = new ChatMicroserviceATester(benchmarkDatabase, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE);
-    var monolithTester = new ChatMonolithATester(benchmarkDatabase, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE);
+    var microserviceTester = new ChatMicroserviceATester(benchmarkDatabase, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE) {
+        ServiceType = "microservice"
+    };
+    var monolithTester = new ChatMonolithATester(benchmarkDatabase, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE) {
+        ServiceType = "monolith"
+    };
 
     ReportHelper.SetActive(microserviceTester, monolithTester);
 
@@ -40,6 +50,14 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
     Console.WriteLine(monolithReport);
     Directory.CreateDirectory($"../../../../Reports/{mainRunTime}");
     File.WriteAllLinesAsync($"../../../../Reports/{mainRunTime}/monolith-report-{i}_{iterationRunTime}.txt", monolithBenchmarkReport.Split('\n'));
+
+
+    var plotModels = ReportHelper.CreatePlot(microserviceReport, monolithReport);
+    var pngExporter = new PngExporter { Width = 800, Height = 600 };
+    foreach (var item in plotModels) {
+        var fileTitle = item.Title.Split("(").First();
+        pngExporter.ExportToFile(item, $"../../../../Reports/{mainRunTime}/final-plot-{fileTitle}-{mainRunTime}.png");
+    }
 
 
     // TODO: Create a combined/full report / Based on ReportHelper.Active

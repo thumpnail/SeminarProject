@@ -1,0 +1,38 @@
+@startuml Architecture
+' Architecture diagram generated from the repository (generated 2025-08-30)
+package Microservice {
+  object ChatMessagingService <<Microservice>> {
+    /send
+    /getroom
+    /getuser
+  }
+  object ChatHistoryService <<Microservice>>{
+    /getmessages
+  }
+  object ChatDatabaseService <<Microservice>>{
+    /insertmessages
+    /getmessages
+    /getuser
+    /getroom
+  }
+}
+package Monolith {
+  object ChatApp {
+    /send
+    /history
+    /getuser
+    /getroom
+  }
+}
+package User {
+  object ChatInterface
+}
+
+ChatInterface <--> ChatApp
+ChatInterface <--> ChatMessagingService
+ChatInterface <--> ChatHistoryService
+ChatHistoryService <--> ChatDatabaseService
+ChatMessagingService <--> ChatDatabaseService
+
+@enduml
+

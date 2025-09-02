@@ -17,6 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		chat-microservice-log.db = chat-microservice-log.db
 		chat-monolith.db = chat-monolith.db
 		chat-monolith-log.db = chat-monolith-log.db
+		TestConfig.yaml = TestConfig.yaml
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatApp", "Microservice\ChatApp\ChatApp.csproj", "{8CA7C8DC-85FA-44C1-B15D-1E55CCAFE8CE}"
@@ -38,6 +39,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Tests", "Chat.Tests\Chat.Tests.csproj", "{EEEC1AA4-CDCE-4C0D-9008-A5F718D6C5F9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Reporter", "Chat.Reporter\Chat.Reporter.csproj", "{377AEB91-877D-480F-B293-5104711C92FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chat.Benchmark", "Chat.Benchmark\Chat.Benchmark.csproj", "{CAA52937-1914-44B3-837C-78F31E7253D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -69,10 +72,10 @@ Global
 		{8FBF8BBB-158F-4EFB-850A-6338761D94CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FBF8BBB-158F-4EFB-850A-6338761D94CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FBF8BBB-158F-4EFB-850A-6338761D94CA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{2D3430EC-6C7C-47A1-8F69-EF646365770D}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{57DBDA1F-672B-4722-A674-CC40C52C448B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{57DBDA1F-672B-4722-A674-CC40C52C448B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57DBDA1F-672B-4722-A674-CC40C52C448B}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -89,5 +92,9 @@ Global
 		{377AEB91-877D-480F-B293-5104711C92FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{377AEB91-877D-480F-B293-5104711C92FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{377AEB91-877D-480F-B293-5104711C92FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAA52937-1914-44B3-837C-78F31E7253D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAA52937-1914-44B3-837C-78F31E7253D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAA52937-1914-44B3-837C-78F31E7253D6}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{CAA52937-1914-44B3-837C-78F31E7253D6}.Debug|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

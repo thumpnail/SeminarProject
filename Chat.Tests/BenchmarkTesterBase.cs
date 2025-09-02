@@ -14,6 +14,7 @@ using ChatApp.Client;
 namespace Chat.Tests;
 
 public abstract class BenchmarkTesterBase : ATester {
+    public required string ServiceType { get; set; }
     protected string runIndexIdentifier;
     protected List<string> usernames = new();
     protected Random rand = new();
@@ -27,7 +28,7 @@ public abstract class BenchmarkTesterBase : ATester {
     public StringBuilder ReportBuilder { get; set; } = new StringBuilder();
     protected int invalidStatusCodeCount = 0;
 
-    public BenchmarkTesterBase(IBenchmarkDatabase benchmarkDatabase, int maxThreads, int maxMessages, int threadThrottle) {
+    public BenchmarkTesterBase(IBenchmarkDatabase benchmarkDatabase, int maxThreads, int maxMessages, int threadThrottle, string serviceType) {
         this.benchmarkDatabase = benchmarkDatabase;
         this.threadThrottle = threadThrottle;
         threadCount = maxThreads;
@@ -36,6 +37,7 @@ public abstract class BenchmarkTesterBase : ATester {
             usernames.Add($"user{i + 1}");
         }
         runIndexIdentifier = Guid.NewGuid().ToString();
+        ServiceType = serviceType;
     }
 
     public void TrackHttpStatusCode(int statusCode) {
@@ -108,7 +110,8 @@ public abstract class BenchmarkTesterBase : ATester {
             StartTime = startTime,
             EndTime = endTime,
             Duration = (endTime - startTime).TotalSeconds,
-            SubReports = new List<BenchmarkSubReport>()
+            SubReports = new List<BenchmarkSubReport>(),
+            DataList = reportData.Where(x=>x.Type == ServiceType).ToList(),
         };
         foreach (var endpointData in groupedData) {
             ReportBuilder.AppendLine($"Endpoint: {endpointData.Endpoint}");

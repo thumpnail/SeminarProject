@@ -1,0 +1,279 @@
+﻿@startuml
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide empty methods
+hide circle
+
+' title SeminarProject – Klassendiagramm
+
+package "Chat.Common" {
+  class "Addresses" as Chat_Common_Addresses
+  class "Logger" as Chat_Common_Logger
+  class "MsgPck" as Chat_Common_MsgPck
+  class "UserContext" as Chat_Common_UserContext
+  record "LoginToken" as Chat_Common_LoginToken
+
+  interface "IDatabase" as Chat_Common_IDatabase
+  class "LocalDatabase" as Chat_Common_LocalDatabase
+  class "LiteBasedDatabase" as Chat_Common_LiteBasedDatabase
+  class "FlatMockDatabase" as Chat_Common_FlatMockDatabase
+  class "FastDBDatabase" as Chat_Common_FastDBDatabase
+}
+
+package "Chat.Common.Models" {
+  class "CollectionName" as Chat_Common_Models_CollectionName {
+    + ROOMS : string
+    + USERS : string
+    + MESSAGES : string
+    + TOKENS : string
+  }
+  record "User" as Chat_Common_Models_User {
+    + Id : Identifier
+    + Username : string
+    + ChatRooms : List<ChatRoom>
+  }
+  record "ChatRoom" as Chat_Common_Models_ChatRoom {
+    + Id : Identifier
+    + ComparableUserBasedId : string
+    + Users : List<User>
+    + Messages : List<Message>
+    + CreationDate : DateTime
+  }
+  record "Message" as Chat_Common_Models_Message {
+    + Id : Identifier
+    + SendingUser : User
+    + ChatRoom : ChatRoom
+    + Content : string
+    + Timestamp : DateTime
+  }
+  record "Token" as Chat_Common_Models_Token {
+    + Id : string
+    + Username : string
+    + TokenValue : string
+    + Creation : DateTime
+    + Expiration : DateTime
+    + RefreshToken : string
+    + IsRefreshToken : bool
+    + Owner : User
+  }
+  class "BenchmarkReport" as Chat_Common_Models_BenchmarkReport {
+    + RunIndexIdentifier : string
+    + ThreadCount : int
+    + MsgCount : int
+    + ThreadThrottle : int
+    + StartTime : DateTime
+    + EndTime : DateTime
+    + ServiceType : string
+    + Duration : double
+    + InvalidStatusCodeCount : int
+    + SubReports : List<BenchmarkSubReport>
+    + DataList : List<Data>
+  }
+  class "BenchmarkSubReport" as Chat_Common_Models_BenchmarkSubReport {
+    + Endpoint : string
+    + Count : int
+    + AvgDurationMs : float
+    + MinDurationMs : float
+    + MaxDurationMs : float
+    + AvgAllocatedBytes : double
+    + MaxAllocatedBytes : long
+    + MinAllocatedBytes : long
+  }
+}
+
+package "Chat.Common.Contracts" {
+  class "BenchmarkTag" as Chat_Common_Contracts_BenchmarkTag {
+    + SubTags : List<BenchmarkSubTag>
+  }
+  class "BenchmarkSubTag" as Chat_Common_Contracts_BenchmarkSubTag {
+    + Name : string
+    + Timestamp : long
+    + ThreadMemory : long
+    + Memory : long
+  }
+  record "MessageSendContract" as Chat_Common_Contracts_MessageSendContract
+  record "MessageSendResponseContract" as Chat_Common_Contracts_MessageSendResponseContract {
+    + Message : string
+    + Success : bool
+    + Tag : BenchmarkTag
+  }
+  record "HistoryRetrieveContract" as Chat_Common_Contracts_HistoryRetrieveContract
+  record "HistoryResponseContract" as Chat_Common_Contracts_HistoryResponseContract {
+    + Messages : List<Chat.Common.Models.Message>
+    + Success : bool
+    + Tag : BenchmarkTag
+  }
+  record "RoomRetrieveContract" as Chat_Common_Contracts_RoomRetrieveContract
+  record "RoomRetrieveResponseContract" as Chat_Common_Contracts_RoomRetrieveResponseContract {
+    + Success : bool
+    + Message : string
+    + RoomId : ID
+    + Tag : BenchmarkTag
+  }
+}
+
+package "Global" {
+  class "Data" as Global_Data {
+    + RunIndexIdentifier : string
+    + Type : string
+    + Endpoint : string
+    + Timestamp : DateTime
+    + DurationMs : float
+    + Sender : string
+    + Receiver : string
+    + Tag : Chat.Common.Contracts.BenchmarkTag
+    + HttpStatusCode : int
+  }
+}
+
+package "Chat.Tests" {
+  abstract class "ATester" as Chat_Tests_ATester {
+    + Run() : void
+    + Report(out string) : Chat.Common.Models.BenchmarkReport
+  }
+  abstract class "BenchmarkTesterBase" as Chat_Tests_BenchmarkTesterBase {
+    + ServiceType : string
+    + ReportBuilder : StringBuilder
+    + Run() : void
+    .. internals ..
+  }
+  class "ChatMicroserviceATester" as Chat_Tests_ChatMicroserviceATester
+  class "ChatMonolithATester" as Chat_Tests_ChatMonolithATester
+
+  interface "IBenchmarkDatabase" as Chat_Tests_IBenchmarkDatabase {
+    + GetDataCollection() : IEnumerable<Data>
+    + GetReportCollection() : IEnumerable<Chat.Common.Models.BenchmarkReport>
+    + InsertData(Data)
+    + InsertReport(Chat.Common.Models.BenchmarkReport)
+    + FindDataByRunIndex(string) : List<Data>
+    + GetAllReports() : List<Chat.Common.Models.BenchmarkReport>
+    + CountDataEntries() : int
+    + Clear()
+    + GetLastHttpStatusCode() : int
+  }
+  class "InMemoryBenchmarkDatabase" as Chat_Tests_InMemoryBenchmarkDatabase
+  class "LiteBenchmarkDatabase" as Chat_Tests_LiteBenchmarkDatabase
+  class "FlatMockBenchmarkDatabase" as Chat_Tests_FlatMockBenchmarkDatabase
+
+  enum "ServerType" as Chat_Tests_ServerType {
+    Monolith
+    Microservice
+  }
+  class "EndpointMapping" as Chat_Tests_EndpointMapping {
+    + GetRoom : string
+    + GetMessages : string
+    + SendMessage : string
+  }
+
+  class "ReportHelper" as Chat_Tests_ReportHelper {
+    + microserviceTester : List<ChatMicroserviceATester>
+    + monolithTester : List<ChatMonolithATester>
+    + activeMicroserviceTester : ChatMicroserviceATester
+    + activeMonolithTester : ChatMonolithATester
+    + CreateCombinedReport(...)
+    + CreateFinalReport() : string
+    + CreateReport(...) : string
+    + CreatePlot(...) : List<OxyPlot.PlotModel>
+  }
+  record "FullReportModel" as Chat_Tests_FullReportModel {
+    + Endpoint : string
+    + Count : int
+    + ServerType : string
+    + MinMinDuration : float
+    + MinAvgDuration : float
+    + MinMaxDuration : float
+    + AvgMinDuration : float
+    + AvgAvgDuration : float
+    + AvgMaxDuration : float
+    + MaxMinDuration : float
+    + MaxAvgDuration : float
+    + MaxMaxDuration : float
+    + MinMinAllocatedBytes : long
+    + MinAvgAllocatedBytes : double
+    + MinMaxAllocatedBytes : long
+    + AvgMinAllocatedBytes : double
+    + AvgAvgAllocatedBytes : double
+    + AvgMaxAllocatedBytes : double
+    + MaxMinAllocatedBytes : long
+    + MaxAvgAllocatedBytes : double
+    + MaxMaxAllocatedBytes : long
+  }
+  record "FullReportViewModel" as Chat_Tests_FullReportViewModel {
+    + Endpoint : string
+    + IterationsCount : int
+    + ServerType : string
+    + MinMinDuration : string
+    + MinAvgDuration : string
+    + MinMaxDuration : string
+    + AvgMinDuration : string
+    + AvgAvgDuration : string
+    + AvgMaxDuration : string
+    + MaxMinDuration : string
+    + MaxAvgDuration : string
+    + MaxMaxDuration : string
+  }
+}
+
+package "Chat.Reporter" {
+  class "Reporter" as Chat_Reporter_Reporter {
+    + type : string
+    .. internals ..
+  }
+}
+
+package "Chat.Benchmark" {
+  class "DatabaseBenchmark" as Chat_Benchmark_DatabaseBenchmark {
+    + maxMessages : int
+    + Setup()
+    + RunBenchmarkLocalDB()
+    + RunBenchmarkLiteDB()
+  }
+}
+
+package "ChatApp.Client" {
+  class "Helper" as ChatApp_Client_Helper <<static>>
+}
+
+' Inheritance & Implementation
+Chat_Common_LocalDatabase ..|> Chat_Common_IDatabase
+Chat_Common_LiteBasedDatabase ..|> Chat_Common_IDatabase
+Chat_Common_FlatMockDatabase ..|> Chat_Common_IDatabase
+Chat_Common_FastDBDatabase ..|> Chat_Common_IDatabase
+
+Chat_Tests_InMemoryBenchmarkDatabase ..|> Chat_Tests_IBenchmarkDatabase
+Chat_Tests_LiteBenchmarkDatabase ..|> Chat_Tests_IBenchmarkDatabase
+Chat_Tests_FlatMockBenchmarkDatabase ..|> Chat_Tests_IBenchmarkDatabase
+
+Chat_Tests_BenchmarkTesterBase --|> Chat_Tests_ATester
+Chat_Tests_ChatMicroserviceATester --|> Chat_Tests_BenchmarkTesterBase
+Chat_Tests_ChatMonolithATester --|> Chat_Tests_BenchmarkTesterBase
+
+' Key associations
+Chat_Common_Models_User "*" -- "*" Chat_Common_Models_ChatRoom
+Chat_Common_Models_ChatRoom "1" -- "*" Chat_Common_Models_Message
+Chat_Common_Models_Message "1" --> "1" Chat_Common_Models_User : SendingUser
+Chat_Common_Models_Token "1" --> "1" Chat_Common_Models_User : Owner
+
+Chat_Common_Models_BenchmarkReport "1" -- "*" Chat_Common_Models_BenchmarkSubReport
+Chat_Common_Models_BenchmarkReport "1" -- "*" Global_Data
+
+Chat_Common_Contracts_BenchmarkTag "1" -- "*" Chat_Common_Contracts_BenchmarkSubTag
+Chat_Common_Contracts_MessageSendResponseContract --> Chat_Common_Contracts_BenchmarkTag
+Chat_Common_Contracts_HistoryResponseContract --> Chat_Common_Models_Message
+Chat_Common_Contracts_RoomRetrieveResponseContract --> Chat_Common_Contracts_BenchmarkTag
+
+Chat_Tests_ReportHelper o-- Chat_Tests_ChatMicroserviceATester
+Chat_Tests_ReportHelper o-- Chat_Tests_ChatMonolithATester
+Chat_Tests_FullReportViewModel ..> Chat_Tests_FullReportModel
+
+Chat_Benchmark_DatabaseBenchmark ..> Chat_Common_IDatabase
+Chat_Benchmark_DatabaseBenchmark ..> Chat_Common_LocalDatabase
+Chat_Benchmark_DatabaseBenchmark ..> Chat_Common_LiteBasedDatabase
+
+Chat_Tests_EndpointMapping --> Chat_Tests_ServerType
+
+ChatApp_Client_Helper ..> Chat_Common_Contracts_MessageSendContract
+ChatApp_Client_Helper ..> Chat_Common_Contracts_RoomRetrieveResponseContract
+ChatApp_Client_Helper ..> Chat_Common_Contracts_HistoryResponseContract
+
+@enduml

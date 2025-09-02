@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net.Http.Json;
 
+using Chat.Common;
 using Chat.Common.Contracts;
 using Chat.Common.Models;
 
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 var dbClient = new HttpClient {
     BaseAddress = new Uri(Chat.Common.Addresses.CHAT_DB_SERVICE)
@@ -24,18 +26,23 @@ var app = builder.Build();
 // Swagger aktivieren
 if (app.Environment.IsDevelopment()) { }
 
+ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+Logger logger = new Logger("ChatHistoryService");
+
 // Beispiel-Endpunkt
 app.MapGet("/", () => "Type=ChatHistoryService");
 app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContract) => {
     var start = Stopwatch.StartNew();
-    // Hier könnte Logik zum Abrufen der ChatRoom-Historie stehen
-    // TODO: call DB Service to get messages for room and time range
 
-    var DBResponse = await dbClient.PostAsJsonAsync("/getMessages", historyContract);
+    var response = await dbClient.PostAsJsonAsync("/getMessages",
+        new HistoryRetrieveContract(historyContract.RoomId, historyContract.StartDate, historyContract.Limit));
 
-    var response = await DBResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
+    var historyResponse = await response.Content.ReadFromJsonAsync<HistoryResponseContract>();
 
     start.Stop();
+
+    logger.Log("/history", $"Post '/getMessages' {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+
 
     var subTag = new BenchmarkSubTag(
         "Microservice/History/history",
@@ -43,14 +50,12 @@ app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContrac
         GC.GetAllocatedBytesForCurrentThread(),
         GC.GetTotalAllocatedBytes()
     );
-    var newTag = response.Tag;
+    var newTag = historyResponse.Tag;
     newTag.SubTags.Add(subTag);
 
-    var newResponse = response with {
+    return Results.Json(historyResponse with {
         Tag = newTag
-    };
-
-    return Results.Json<HistoryResponseContract>(newResponse);
+    });
 });
 
 app.Run(Chat.Common.Addresses.CHAT_HISTORY_SERVICE);

@@ -1,4 +1,5 @@
-﻿using Chat.Common.Contracts;
+﻿using System.Collections.Concurrent;
+using Chat.Common.Contracts;
 using Chat.Common.Models;
 namespace Chat.Common;
 
@@ -7,8 +8,8 @@ namespace Chat.Common;
 /// Ideal für Tests und lokale Entwicklung.
 /// </summary>
 public class LocalDatabase : IDatabase {
-    private readonly Dictionary<string, ChatRoom> roomDictionary = new();
-    private readonly Dictionary<string, User> userDictionary = new();
+    private readonly ConcurrentDictionary<string, User> userDictionary = new();
+    private readonly ConcurrentDictionary<string, ChatRoom> roomDictionary = new();
     private readonly List<Message> messageList = new();
 
     /// <summary>
@@ -25,8 +26,10 @@ public class LocalDatabase : IDatabase {
         if (user == null) {
             return new MessageSendResponseContract("Sender not found", false, new());
         }
-
-        var room = roomDictionary.GetValueOrDefault(messageSendContract.RoomId);
+        if (messageSendContract.RoomId is null) {
+            return new MessageSendResponseContract("Room was null", false, new());
+        }
+        var room = roomDictionary.TryGetValue(messageSendContract.RoomId, out var foundRoom) ? foundRoom : null;
         if (room == null) {
             return new MessageSendResponseContract("Room not found", false, new());
         }
@@ -48,7 +51,8 @@ public class LocalDatabase : IDatabase {
     /// <inheritdoc/>
     public HistoryResponseContract GetMessages(HistoryRetrieveContract historyRetrieveContract) {
         var messages = messageList
-            .Where(m => m.ChatRoom.Id == historyRetrieveContract.RoomId && m.Timestamp > historyRetrieveContract.StartDate)
+            .Where(m => m.ChatRoom.Id == historyRetrieveContract.RoomId)
+            .Where(m=> m.Timestamp > historyRetrieveContract.StartDate)
             .ToList();
 
         return new HistoryResponseContract(messages, true, new());

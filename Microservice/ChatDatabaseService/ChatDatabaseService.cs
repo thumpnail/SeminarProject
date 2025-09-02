@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 //const string DATABASE_PATH = "./chat.db";
 //
 //var db = new LiteDB.LiteDatabase(DATABASE_PATH);
@@ -29,8 +30,9 @@ var app = builder.Build();
 
 // Swagger aktivieren
 if (app.Environment.IsDevelopment()) { }
-
-LocalDatabase database = new("../../../../../chat-microservice.db");
+ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+Logger logger = new("ChatDatabaseService");
+FlatMockDatabase database = new("../../../../../chat-microservice.db");
 // Beispiel-Endpunkt
 app.MapGet("/", () => "Type=ChatDatabaseService");
 
@@ -39,14 +41,16 @@ app.MapPost("/insertMessage", async ([FromBody] MessageSendContract messageSendC
     var response = database.InsertMessage(messageSendContract);
     start.Stop();
 
+    logger.Log("/insertMessage", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+    //appLogger.LogInformation(new EventId(1, "MessageInserted"), $"/insertMessage took {start.ElapsedMilliseconds} ms");
+
     var tag = new BenchmarkTag([
         new(
             "Microservice/ChatDatabaseService/insertMessage",
             start.ElapsedMilliseconds,
             GC.GetAllocatedBytesForCurrentThread(),
             GC.GetTotalAllocatedBytes())
-    ], StatusCodes.Status200OK);
-
+    ]);
     return Results.Json(
         response with {
             Tag = tag
@@ -58,13 +62,16 @@ app.MapPost("/getMessages", async ([FromBody] HistoryRetrieveContract historyRet
     var response = database.GetMessages(historyRetrieveContract);
     start.Stop();
 
+    logger.Log("/getMessages", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+    //appLogger.LogInformation(new EventId(2, "MessagesRetrieved"), $"/getMessages took {start.ElapsedMilliseconds} ms");
+
     var tag = new BenchmarkTag([
         new(
             "Microservice/ChatDatabaseService/getMessages",
             start.ElapsedMilliseconds,
             GC.GetAllocatedBytesForCurrentThread(),
             GC.GetTotalAllocatedBytes())
-    ], StatusCodes.Status200OK);
+    ]);
 
     return Results.Json(response with {
         Tag = tag
@@ -76,9 +83,12 @@ app.MapPost("/getroom", async ([FromBody] RoomRetrieveContract roomRetrieveContr
     var response = database.GetRoom(roomRetrieveContract);
     start.Stop();
 
+    logger.Log("/getroom", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+    //appLogger.LogInformation(new EventId(3, "RoomRetrieved"), $"/getroom took {start.ElapsedMilliseconds} ms");
+
     var tag = new BenchmarkTag([
         new("Microservice/ChatDatabaseService/getroom", start.ElapsedMilliseconds, GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalAllocatedBytes())
-    ], StatusCodes.Status200OK);
+    ]);
 
     return Results.Json(
         response with {

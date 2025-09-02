@@ -10,6 +10,7 @@
     public int InvalidStatusCodeCount { get; set; } // Added property to track invalid HTTP status codes
 
     public List<BenchmarkSubReport> SubReports { get; set; } = new List<BenchmarkSubReport>();
+    public List<Data> DataList { get; set; }
 }
 public class BenchmarkSubReport {
     public string Endpoint { get; set; }

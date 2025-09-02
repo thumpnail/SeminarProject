@@ -17,7 +17,7 @@ public class LiteBasedDatabase : IDatabase {
     /// Initialisiert die LiteDB-Datenbank und Collections.
     /// </summary>
     /// <param name="databasePath">Pfad zur Datenbankdatei</param>
-    public LiteBasedDatabase(string databasePath = "./chat.db") {
+    public LiteBasedDatabase(string databasePath = "../../../../../shared-chat.db") {
         LiteDatabase db1 = new(databasePath);
         roomCollection = db1.GetCollection<ChatRoom>(CollectionName.ROOMS);
         usersCollection = db1.GetCollection<User>(CollectionName.USERS);

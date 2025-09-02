@@ -1,6 +1,9 @@
 ﻿using System.Text;
 
 using BetterConsoles.Tables.Configuration;
+
+using OxyPlot;
+using OxyPlot.Series;
 namespace Chat.Tests;
 
 public class ReportHelper {
@@ -148,6 +151,47 @@ public class ReportHelper {
         microserviceTester.Add(chatMicroserviceATester);
         monolithTester.Add(chatMonolithATester);
     }
+    public List<PlotModel> CreatePlot(BenchmarkReport microserviceReport, BenchmarkReport monolithReport) {
+        var list = new List<PlotModel>();
+
+        var plotModelRoom = new PlotModel() { Title = "Room Results(Microservice: Blue, Monolith: Red)" };
+        LineSeries roomSeries1 = CreateLineSeriesFromReport(microserviceReport, "/room", OxyColors.Blue);
+        LineSeries roomSeries2 = CreateLineSeriesFromReport(monolithReport, "/room", OxyColors.Red);
+        plotModelRoom.Series.Add(roomSeries1);
+        plotModelRoom.Series.Add(roomSeries2);
+        list.Add(plotModelRoom);
+        //////////////////////////////////////////
+        var plotModelHistory = new PlotModel() { Title = "History Results(Microservice: Blue, Monolith: Red)" };
+        LineSeries historySeries1 = CreateLineSeriesFromReport(microserviceReport, "/history", OxyColors.Blue);
+        LineSeries historySeries2 = CreateLineSeriesFromReport(monolithReport, "/history",OxyColors.Red );
+        plotModelHistory.Series.Add(historySeries1);
+        plotModelHistory.Series.Add(historySeries2);
+        list.Add(plotModelHistory);
+        //////////////////////////////////////////
+        var plotModelSend = new PlotModel() { Title = "Send Results(Microservice: Blue, Monolith: Red)" };
+        LineSeries sendSeries1 = CreateLineSeriesFromReport(microserviceReport, "/send", OxyColors.Blue);
+        LineSeries sendSeries2 = CreateLineSeriesFromReport(monolithReport, "/send", OxyColors.Red);
+        plotModelSend.Series.Add(sendSeries1);
+        plotModelSend.Series.Add(sendSeries2);
+        list.Add(plotModelSend);
+
+        return list;
+    }
+    private static LineSeries CreateLineSeriesFromReport(BenchmarkReport report1, string endpoint, OxyColor color) {
+
+        var roomSeries = new LineSeries {
+            Title = report1.ServiceType,
+            MarkerType = MarkerType.Circle,
+            MarkerSize = 2,
+            MarkerStroke = color,
+            Color = color
+        };
+        int i = 0;
+        foreach(var item in report1.DataList.Where(x=>x.Endpoint.Contains(endpoint))) {
+            roomSeries.Points.Add(new DataPoint(i++,item.DurationMs));
+        }
+        return roomSeries;
+    }
 }
 
 public record FullReportModel {
@@ -179,23 +223,26 @@ public record FullReportViewModel {
         IterationsCount = model.Count;
         ServerType = model.ServerType;
         MinMinDuration = $"{model.MinMinDuration:F2} ms";
-        MinAvgDuration = $"{model.MinAvgDuration:F2} ms({(((model.MinAvgDuration - model.MinMinDuration) / (model.MinMaxDuration - model.MinMinDuration))*100):F1}% mean)";
+        var minAvgMean = (((model.MinAvgDuration - model.MinMinDuration) / (model.MinMaxDuration - model.MinMinDuration))*100);
+        MinAvgDuration = $"{model.MinAvgDuration:F2} ms{(float.IsNaN(minAvgMean)?"":$"({minAvgMean}%)")}";
         MinMaxDuration = $"{model.MinMaxDuration:F2} ms";
         AvgMinDuration = $"{model.AvgMinDuration:F2} ms";
-        AvgAvgDuration = $"{model.AvgAvgDuration:F2} ms({(((model.AvgAvgDuration - model.AvgMinDuration) / (model.AvgMaxDuration - model.AvgMinDuration))*100):F1}% mean)";
+        var avgAvgMean = (((model.AvgAvgDuration - model.AvgMinDuration) / (model.AvgMaxDuration - model.AvgMinDuration))*100);
+        AvgAvgDuration = $"{model.AvgAvgDuration:F2} ms{(float.IsNaN(avgAvgMean)?"":$"({avgAvgMean}%)")}";
         AvgMaxDuration = $"{model.AvgMaxDuration:F2} ms";
         MaxMinDuration = $"{model.MaxMinDuration:F2} ms";
-        MaxAvgDuration = $"{model.MaxAvgDuration:F2} ms({(((model.MaxAvgDuration - model.MaxMinDuration) / (model.MaxMaxDuration - model.MaxMinDuration))*100):F1}% mean)";
+        var maxAvgMean = (((model.MaxAvgDuration - model.MaxMinDuration) / (model.MaxMaxDuration - model.MaxMinDuration))*100);
+        MaxAvgDuration = $"{model.MaxAvgDuration:F2} ms{(float.IsNaN(maxAvgMean)?"":$"({maxAvgMean}%)")}";
         MaxMaxDuration = $"{model.MaxMaxDuration:F2} ms";
-        MinMinAllocatedBytes = $"{(model.MinMinAllocatedBytes/1024/1024):N0} MB";
-        MinAvgAllocatedBytes = $"{(model.MinAvgAllocatedBytes/1024/1024):N0} MB";
-        MinMaxAllocatedBytes = $"{(model.MinMaxAllocatedBytes/1024/1024):N0} MB";
-        AvgMinAllocatedBytes = $"{(model.AvgMinAllocatedBytes/1024/1024):N0} MB";
-        AvgAvgAllocatedBytes = $"{(model.AvgAvgAllocatedBytes/1024/1024):N0} MB";
-        AvgMaxAllocatedBytes = $"{(model.AvgMaxAllocatedBytes/1024/1024):N0} MB";
-        MaxMinAllocatedBytes = $"{(model.MaxMinAllocatedBytes/1024/1024):N0} MB";
-        MaxAvgAllocatedBytes = $"{(model.MaxAvgAllocatedBytes/1024/1024):N0} MB";
-        MaxMaxAllocatedBytes = $"{(model.MaxMaxAllocatedBytes/1024/1024):N0} MB";
+        //MinMinAllocatedBytes = $"{(model.MinMinAllocatedBytes/1024/1024):N0} MB";
+        //MinAvgAllocatedBytes = $"{(model.MinAvgAllocatedBytes/1024/1024):N0} MB";
+        //MinMaxAllocatedBytes = $"{(model.MinMaxAllocatedBytes/1024/1024):N0} MB";
+        //AvgMinAllocatedBytes = $"{(model.AvgMinAllocatedBytes/1024/1024):N0} MB";
+        //AvgAvgAllocatedBytes = $"{(model.AvgAvgAllocatedBytes/1024/1024):N0} MB";
+        //AvgMaxAllocatedBytes = $"{(model.AvgMaxAllocatedBytes/1024/1024):N0} MB";
+        //MaxMinAllocatedBytes = $"{(model.MaxMinAllocatedBytes/1024/1024):N0} MB";
+        //MaxAvgAllocatedBytes = $"{(model.MaxAvgAllocatedBytes/1024/1024):N0} MB";
+        //MaxMaxAllocatedBytes = $"{(model.MaxMaxAllocatedBytes/1024/1024):N0} MB";
     }
     public string Endpoint { get; set; }
     public int IterationsCount { get; set; }
@@ -209,13 +256,13 @@ public record FullReportViewModel {
     public string MaxMinDuration { get; set; }
     public string MaxAvgDuration { get; set; }
     public string MaxMaxDuration { get; set; }
-    public string MinMinAllocatedBytes { get; set; }
-    public string MinAvgAllocatedBytes { get; set; }
-    public string MinMaxAllocatedBytes { get; set; }
-    public string AvgMinAllocatedBytes { get; set; }
-    public string AvgAvgAllocatedBytes { get; set; }
-    public string AvgMaxAllocatedBytes { get; set; }
-    public string MaxMinAllocatedBytes { get; set; }
-    public string MaxAvgAllocatedBytes { get; set; }
-    public string MaxMaxAllocatedBytes { get; set; }
+    //public string MinMinAllocatedBytes { get; set; }
+    //public string MinAvgAllocatedBytes { get; set; }
+    //public string MinMaxAllocatedBytes { get; set; }
+    //public string AvgMinAllocatedBytes { get; set; }
+    //public string AvgAvgAllocatedBytes { get; set; }
+    //public string AvgMaxAllocatedBytes { get; set; }
+    //public string MaxMinAllocatedBytes { get; set; }
+    //public string MaxAvgAllocatedBytes { get; set; }
+    //public string MaxMaxAllocatedBytes { get; set; }
 }

@@ -1,0 +1,38 @@
+@startuml MicroserviceClassDiagram
+' Microservice + Chat.Common Klassendiagramm
+
+package "Microservice" {
+  ' Keine Klassen gefunden, ggf. ergänzen
+}
+
+package "Chat.Common" {
+  class BenchmarkReport
+  class BenchmarkSubReport
+  class UserContext
+  class MsgPck
+  class Data
+  class CollectionName
+  class Logger
+  class JsonExtensions
+  class LocalDatabase
+  class LiteBasedDatabase
+  interface IDatabase
+  class FlatMockDatabase
+  class FastDBDatabase
+  class LiteBenchmarkDatabase
+  class InMemoryBenchmarkDatabase
+  interface IBenchmarkDatabase
+  class FlatMockBenchmarkDatabase
+  class BenchmarkTag
+  class BenchmarkSubTag
+  class Addresses
+
+  LocalDatabase --|> IDatabase
+  LiteBasedDatabase --|> IDatabase
+  FlatMockDatabase --|> IDatabase
+  FastDBDatabase --|> IDatabase
+  LiteBenchmarkDatabase --|> IBenchmarkDatabase
+  InMemoryBenchmarkDatabase --|> IBenchmarkDatabase
+  FlatMockBenchmarkDatabase --|> IBenchmarkDatabase
+}
+@enduml

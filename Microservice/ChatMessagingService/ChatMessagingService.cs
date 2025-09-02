@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 HttpClient dbClient = new HttpClient {
     BaseAddress = new(Addresses.CHAT_DB_SERVICE)
@@ -33,20 +34,26 @@ if (app.Environment.IsDevelopment()) {
     //app.UseSwagger();
     //app.UseSwaggerUI();
 }
-
+//ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>();
+Logger logger = new Logger("ChatMessagingService");
 // Define a simple endpoint
 app.MapGet("/", () => "Type=ChatMessagingService");
 // receive a Message
 app.MapPost("/send", async ([FromBody] MessageSendContract msgSend) => {
     var start = Stopwatch.StartNew();
+
     var response = await dbClient.PostAsJsonAsync("/insertMessage", msgSend);
 
     var msgSendResponse = await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
 
+    start.Stop();
+
     if (msgSendResponse is null) {
         return Results.Json(new MessageSendResponseContract("Failed to send Message", false, msgSendResponse.Tag));
     }
-    start.Stop();
+
+    logger.Log("/send", $"Post '/insertMessage' took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+    //appLogger.LogInformation(new EventId(1, "MessageSent"), $"/send Post '/insertMessage' took {start.ElapsedMilliseconds} ms");
 
     var subTag = new BenchmarkSubTag(
         "Microservice/MessagingService/send",
@@ -64,15 +71,20 @@ app.MapPost("/send", async ([FromBody] MessageSendContract msgSend) => {
 // create a room
 app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
     var start = Stopwatch.StartNew();
+
     var roomResponse = await dbClient.PostAsJsonAsync("/getroom",
-    new RoomRetrieveContract(room.Sender, room.Receivers));
+        new RoomRetrieveContract(room.Sender, room.Receivers));
 
     var parsedRoom = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
 
-    if (parsedRoom == null) {
-        return Results.Json(new RoomRetrieveResponseContract(false, Message:"Failed to retrieve room", null, parsedRoom.Tag));
-    }
     start.Stop();
+
+    //if (parsedRoom == null) {
+    //    return Results.Json(new RoomRetrieveResponseContract(false, Message:"Failed to retrieve room", null, parsedRoom.Tag));
+    //}
+
+    logger.Log("/room", $"Post '/getroom' took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
+    //appLogger.LogInformation(new EventId(2, "RoomRetrieved"), $"/room Post '/getroom' took {start.ElapsedMilliseconds} ms");
 
     var subTag = new BenchmarkSubTag(
         "Microservice/MessagingService/room",

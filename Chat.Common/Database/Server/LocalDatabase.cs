@@ -24,14 +24,14 @@ public class LocalDatabase : IDatabase {
     public MessageSendResponseContract InsertMessage(MessageSendContract messageSendContract) {
         var user = userDictionary.GetValueOrDefault(messageSendContract.Sender);
         if (user == null) {
-            return new MessageSendResponseContract("Sender not found", false, new());
+            return new MessageSendResponseContract(messageSendContract.runIndexIdentifier, "Sender not found", false, new());
         }
         if (messageSendContract.RoomId is null) {
-            return new MessageSendResponseContract("Room was null", false, new());
+            return new MessageSendResponseContract(messageSendContract.runIndexIdentifier, "Room was null", false, new());
         }
         var room = roomDictionary.TryGetValue(messageSendContract.RoomId, out var foundRoom) ? foundRoom : null;
         if (room == null) {
-            return new MessageSendResponseContract("Room not found", false, new());
+            return new MessageSendResponseContract(messageSendContract.runIndexIdentifier, "Room not found", false, new());
         }
 
         var message = new Message {
@@ -45,7 +45,7 @@ public class LocalDatabase : IDatabase {
         messageList.Add(message);
         room.Messages.Add(message);
 
-        return new MessageSendResponseContract(message.Content, true, new());
+        return new MessageSendResponseContract(messageSendContract.runIndexIdentifier, message.Content, true, new());
     }
 
     /// <inheritdoc/>
@@ -55,7 +55,7 @@ public class LocalDatabase : IDatabase {
             .Where(m=> m.Timestamp > historyRetrieveContract.StartDate)
             .ToList();
 
-        return new HistoryResponseContract(messages, true, new());
+        return new HistoryResponseContract(historyRetrieveContract.runIndexIdentifier, messages, true, new());
     }
 
     /// <inheritdoc/>
@@ -113,6 +113,6 @@ public class LocalDatabase : IDatabase {
 
         UpdateRoomWithUsers(room, users);
 
-        return new RoomRetrieveResponseContract(true, String.Empty, RoomId: room.Id, new());
+        return new RoomRetrieveResponseContract(roomRetrieveContract.runIndexIdentifier, true, String.Empty, RoomId: room.Id, new());
     }
 }

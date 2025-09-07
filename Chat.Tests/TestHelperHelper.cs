@@ -12,18 +12,18 @@ public static class TestHelperHelper {
         }
         if (response.StatusCode == System.Net.HttpStatusCode.RequestTimeout) {
             Console.WriteLine("Request timed out. Please try again later.");
-            return new MessageSendResponseContract("Request timed out.", false, new BenchmarkTag());
+            return new MessageSendResponseContract(messageContract.runIndexIdentifier, "Request timed out.", false, new BenchmarkTag());
         }
         if (response.StatusCode == System.Net.HttpStatusCode.InternalServerError) {
             Console.WriteLine("Internal server error. Please try again later.");
-            return new MessageSendResponseContract("Internal server error.", false, new BenchmarkTag());
+            return new MessageSendResponseContract(messageContract.runIndexIdentifier, "Internal server error.", false, new BenchmarkTag());
         }
         Console.WriteLine("System Failed to send Message.");
-        return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag());
+        return new MessageSendResponseContract(messageContract.runIndexIdentifier, "Failed to send Message.", false, new BenchmarkTag());
     }
-    public static async Task<RoomRetrieveResponseContract> GetRoomAsync(this HttpClient client, string sender, string[] receivers) {
+    public static async Task<RoomRetrieveResponseContract> GetRoomAsync(this HttpClient client, string runIndexIdentifier, string sender, string[] receivers) {
         var roomResponse = await client.PostAsJsonAsync("/room",
-            new RoomRetrieveContract(sender, receivers));
+            new RoomRetrieveContract(runIndexIdentifier, sender, receivers));
 
         if (roomResponse.IsSuccessStatusCode) {
             var room = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
@@ -32,10 +32,10 @@ public static class TestHelperHelper {
             }
         }
         Console.WriteLine("Failed to retrieve room information.");
-        return new RoomRetrieveResponseContract(false, "Failed to retrieve room information", null, new BenchmarkTag());
+        return new RoomRetrieveResponseContract(runIndexIdentifier, false, "Failed to retrieve room information", null, new BenchmarkTag());
     }
-    public static async Task<HistoryResponseContract> FetchLastMessages(this HttpClient client, string roomId) {
-        var historyRetrieveContract = new HistoryRetrieveContract(roomId, lastMessageTimestamp, -1);
+    public static async Task<HistoryResponseContract> FetchLastMessages(this HttpClient client, string runIndexIdentifier, string roomId) {
+        var historyRetrieveContract = new HistoryRetrieveContract(runIndexIdentifier, roomId, lastMessageTimestamp, -1);
         lastMessageTimestamp = DateTime.Now;
         var historyResponse = await client.PostAsJsonAsync("/history", historyRetrieveContract);
         if (historyResponse.IsSuccessStatusCode) {
@@ -47,14 +47,14 @@ public static class TestHelperHelper {
                 return history;
             }
         }
-        return new HistoryResponseContract([], false, new BenchmarkTag());
+        return new HistoryResponseContract(runIndexIdentifier, [], false, new BenchmarkTag());
     }
 
-    public static async Task<HistoryResponseContract> GetChatHistory(this HttpClient client, string roomId) {
+    public static async Task<HistoryResponseContract> GetChatHistory(this HttpClient client, string runIndexIdentifier, string roomId) {
         // Fetch the last messages from the chat history
         lastMessageTimestamp = DateTime.Now.AddDays(-1);
         // Retrieve the chat history for the room
-        var historyResponse = await client.PostAsJsonAsync("/history", new HistoryRetrieveContract(roomId, lastMessageTimestamp, 50));
+        var historyResponse = await client.PostAsJsonAsync("/history", new HistoryRetrieveContract(runIndexIdentifier, roomId, lastMessageTimestamp, 50));
         if (historyResponse.IsSuccessStatusCode) {
             // Read the response content as HistoryResponseContract
             var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();
@@ -70,6 +70,6 @@ public static class TestHelperHelper {
         } else {
             Console.WriteLine("Failed to retrieve chat history.");
         }
-        return new HistoryResponseContract([], false, new BenchmarkTag());
+        return new HistoryResponseContract(runIndexIdentifier, [], false, new BenchmarkTag());
     }
 }

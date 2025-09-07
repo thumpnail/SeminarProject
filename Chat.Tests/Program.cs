@@ -26,6 +26,10 @@ int THREAD_THROTTLE = int.Parse(cfg["THREAD_THROTTLE"]) ?? 0;
 
 var ReportHelper = new ReportHelper();
 var mainRunTime = DateTime.Now.ToString().Replace(':', '-');
+
+var microserviceDBInfo = new Dictionary<string, string>();
+var monolithDBInfo = new Dictionary<string, string>();
+
 for (int i = 0; i < MAX_ITERATIONS; i++) {
     var iterationRunTime = DateTime.Now.ToString().Replace(':', '-');
     var microserviceTester = new ChatMicroserviceATester(benchmarkDatabase, MAX_THREADS, MAX_MESSAGES, THREAD_THROTTLE) {
@@ -38,25 +42,27 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
     ReportHelper.SetActive(microserviceTester, monolithTester);
 
     microserviceTester.Run();
+    microserviceDBInfo = microserviceTester.databaseInfo;
     // TODO: Create a report for microserviceTester(Atom/Single/Sub)
     var microserviceBenchmarkReport = ReportHelper.CreateReport(microserviceTester, out var microserviceReport);
     Console.WriteLine(microserviceReport);
     Directory.CreateDirectory($"../../../../Reports/{mainRunTime}");
-    File.WriteAllLinesAsync($"../../../../Reports/{mainRunTime}/microservice-report-{i}_{iterationRunTime}.txt", microserviceBenchmarkReport.Split('\n'));
+    File.WriteAllLinesAsync($"../../../../Reports/{mainRunTime}/microservice-{microserviceDBInfo["Type"]}-{microserviceDBInfo["DBType"]}-report-{i}_{iterationRunTime}.txt", microserviceBenchmarkReport.Split('\n'));
 
     monolithTester.Run();
+    monolithDBInfo = monolithTester.databaseInfo;
     // TODO: Create a report for monolithTester(Atom/Single/Sub)
     var monolithBenchmarkReport = ReportHelper.CreateReport(monolithTester, out var monolithReport);
     Console.WriteLine(monolithReport);
     Directory.CreateDirectory($"../../../../Reports/{mainRunTime}");
-    File.WriteAllLinesAsync($"../../../../Reports/{mainRunTime}/monolith-report-{i}_{iterationRunTime}.txt", monolithBenchmarkReport.Split('\n'));
+    File.WriteAllLinesAsync($"../../../../Reports/{mainRunTime}/monolith-{monolithDBInfo["Type"]}-{monolithDBInfo["DBType"]}-report-{i}_{iterationRunTime}.txt", monolithBenchmarkReport.Split('\n'));
 
 
     var plotModels = ReportHelper.CreatePlot(microserviceReport, monolithReport);
     var pngExporter = new PngExporter { Width = 800, Height = 600 };
     foreach (var item in plotModels) {
         var fileTitle = item.Title.Split("(").First();
-        pngExporter.ExportToFile(item, $"../../../../Reports/{mainRunTime}/final-plot-{fileTitle}-{mainRunTime}.png");
+        pngExporter.ExportToFile(item, $"../../../../Reports/{mainRunTime}/final-plot-micro_{microserviceDBInfo["Type"]}-{microserviceDBInfo["DBType"]}-mono_{monolithDBInfo["Type"]}-{monolithDBInfo["DBType"]}-{fileTitle}-{mainRunTime}.png");
     }
 
 
@@ -64,7 +70,7 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
     var combinedBenchmarkReport = ReportHelper.CreateCombinedReport(microserviceReport, monolithReport);
     Console.WriteLine(combinedBenchmarkReport);
     Directory.CreateDirectory($"../../../../Reports/{mainRunTime}");
-    File.WriteAllText($"../../../../Reports/{mainRunTime}/combine-report-{i}_{iterationRunTime}.txt", combinedBenchmarkReport);
+    File.WriteAllText($"../../../../Reports/{mainRunTime}/combine-report-micro_{microserviceDBInfo["Type"]}-{microserviceDBInfo["DBType"]}-mono_{monolithDBInfo["Type"]}-{monolithDBInfo["DBType"]}-{i}_{iterationRunTime}.txt", combinedBenchmarkReport);
 
     Thread.Sleep(ITERATION_THROTTLE);
 }
@@ -73,4 +79,4 @@ for (int i = 0; i < MAX_ITERATIONS; i++) {
 string finalBenchmarkReport = ReportHelper.CreateFinalReport();
 Console.WriteLine(finalBenchmarkReport);
 Directory.CreateDirectory($"../../../../Reports/{mainRunTime}");
-File.WriteAllText($"../../../../Reports/{mainRunTime}/final-report_{mainRunTime}.txt", finalBenchmarkReport);
+File.WriteAllText($"../../../../Reports/{mainRunTime}/final-report-_{mainRunTime}_micro_{microserviceDBInfo["Type"]}-{microserviceDBInfo["DBType"]}-mono_{monolithDBInfo["Type"]}-{monolithDBInfo["DBType"]}.txt", finalBenchmarkReport);

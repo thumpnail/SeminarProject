@@ -10,6 +10,7 @@ using System.Net;
 using Chat.Common.Contracts;
 
 using ChatApp.Client;
+using System.Threading.Tasks;
 
 namespace Chat.Tests;
 
@@ -27,6 +28,8 @@ public abstract class BenchmarkTesterBase : ATester {
     protected DateTime endTime = DateTime.MinValue;
     public StringBuilder ReportBuilder { get; set; } = new StringBuilder();
     protected int invalidStatusCodeCount = 0;
+
+    public Dictionary<string, string> databaseInfo = new();
 
     public BenchmarkTesterBase(IBenchmarkDatabase benchmarkDatabase, int maxThreads, int maxMessages, int threadThrottle, string serviceType) {
         this.benchmarkDatabase = benchmarkDatabase;
@@ -88,16 +91,7 @@ public abstract class BenchmarkTesterBase : ATester {
                 Count = g.Count(),
                 AvgDuration = g.Average(d => d.DurationMs),
                 MinDuration = g.Min(d => d.DurationMs),
-                MaxDuration = g.Max(d => d.DurationMs),
-                MinAllocatedBytes = g.Min(d => d.Tag.SubTags
-                    .Select(x => x.Memory)
-                    .Sum()),
-                MaxAllocatedBytes = g.Max(d => d.Tag.SubTags
-                    .Select(x => x.Memory)
-                    .Sum()),
-                AvgAllocatedBytes = g.Average(d => d.Tag.SubTags
-                    .Select(x => x.Memory)
-                    .Sum())
+                MaxDuration = g.Max(d => d.DurationMs)
             })
             .ToList();
         // create a BenchmarkReport
@@ -110,6 +104,8 @@ public abstract class BenchmarkTesterBase : ATester {
             StartTime = startTime,
             EndTime = endTime,
             Duration = (endTime - startTime).TotalSeconds,
+            InvalidStatusCodeCount = invalidStatusCodeCount,
+            //Tags = benchmarkDatabase.FindTagsByRunIndex(runIndexIdentifier),
             SubReports = new List<BenchmarkSubReport>(),
             DataList = reportData.Where(x=>x.Type == ServiceType).ToList(),
         };
@@ -119,18 +115,12 @@ public abstract class BenchmarkTesterBase : ATester {
             ReportBuilder.AppendLine($"  Avg Duration: {endpointData.AvgDuration:F2} ms");
             ReportBuilder.AppendLine($"  Min Duration: {endpointData.MinDuration:F2} ms");
             ReportBuilder.AppendLine($"  Max Duration: {endpointData.MaxDuration:F2} ms");
-            ReportBuilder.AppendLine($"  Avg Allocated Bytes: {(endpointData.AvgAllocatedBytes / 1024 / 1024):F2} MB");
-            ReportBuilder.AppendLine($"  Min Allocated Bytes: {endpointData.MinAllocatedBytes / 1024 / 1024:F2} MB");
-            ReportBuilder.AppendLine($"  Max Allocated Bytes: {endpointData.MaxAllocatedBytes / 1024 / 1024:F2} MB");
             benchmarkReport.SubReports.Add(new() {
                 Endpoint = benchmarkReport.ServiceType + endpointData.Endpoint,
                 Count = endpointData.Count,
                 AvgDurationMs = endpointData.AvgDuration,
                 MinDurationMs = endpointData.MinDuration,
                 MaxDurationMs = endpointData.MaxDuration,
-                AvgAllocatedBytes = endpointData.AvgAllocatedBytes,
-                MinAllocatedBytes = endpointData.MinAllocatedBytes,
-                MaxAllocatedBytes = endpointData.MaxAllocatedBytes
             });
         }
         benchmarkDatabase.InsertReport(benchmarkReport);
@@ -142,7 +132,7 @@ public abstract class BenchmarkTesterBase : ATester {
         tag = null!;
         historyDuration = 0f;
 
-        var historyTask = historyClient.GetChatHistory(roomId);
+        var historyTask = historyClient.GetChatHistory(runIndexIdentifier, roomId);
         if (historyTask == null)
             throw new InvalidOperationException("GetChatHistory returned null Task.");
 
@@ -175,9 +165,20 @@ public abstract class BenchmarkTesterBase : ATester {
         }
         tag = result.Tag;
     }
+    // info looks like this: "Type=<typename>;DBType=<dbtype>"
+    internal async Task<Dictionary<string, string>> GetDatabaseInfo(HttpClient databaseClient) {
+        var info = await databaseClient.GetAsync("/");
+        var response = await info.Content.ReadAsStringAsync();
+        var result = response.Split(';')
+            .Select(part => part.Split('='))
+            .Where(part => part.Length == 2)
+            .Where(p => p.First() == "Type" || p.First() == "DBType")
+            .ToDictionary(sp => sp.First(), sp => sp.Last());
+        return result;
+    }
     internal string GetRoomInformationAsync(IBenchmarkDatabase dataCollection, string serviceType, string endpoint, HttpClient messagingClient, string sender, string receiver, out DateTime getRoomStart, out float roomDuration, out BenchmarkTag tag) {
         getRoomStart = DateTime.Now;
-        var room = messagingClient.GetRoomAsync(sender, [receiver]);
+        var room = messagingClient.GetRoomAsync(runIndexIdentifier, sender, [receiver]);
         room.Wait();
         if (room.IsCanceled) {
             Console.WriteLine("GetRoomAsync was canceled unexpected.");
@@ -214,7 +215,7 @@ public abstract class BenchmarkTesterBase : ATester {
     }
     internal void SendMessage(IBenchmarkDatabase benchmarkDataCollection, string serviceType, string endpoint, HttpClient client, string sender, string room, int msgIdx, string receiver, out DateTime msgStart, out Task<MessageSendResponseContract> sendTask, out BenchmarkTag tags) {
         msgStart = DateTime.Now;
-        sendTask = client.SendMessageAsync(new(sender, room, $"{sender}:Message{msgIdx} -> {receiver}", DateTime.Now));
+        sendTask = client.SendMessageAsync(new(runIndexIdentifier, sender, room, $"{sender}:Message{msgIdx} -> {receiver}", DateTime.Now));
         try {
             sendTask.Wait(TimeSpan.FromSeconds(200));
         } catch (AggregateException) {

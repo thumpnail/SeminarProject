@@ -9,11 +9,11 @@ public class FlatMockDatabase : IDatabase {
     }
     public MessageSendResponseContract InsertMessage(MessageSendContract messageSendContract) {
         Thread.Sleep(5);
-        return new MessageSendResponseContract("A Message", true, new());
+        return new MessageSendResponseContract(messageSendContract.runIndexIdentifier,"A Message", true, new());
     }
     public HistoryResponseContract GetMessages(HistoryRetrieveContract historyRetrieveContract) {
         Thread.Sleep(5);
-        return new HistoryResponseContract([], true, new());
+        return new HistoryResponseContract(historyRetrieveContract.runIndexIdentifier, [], true, new());
     }
     public List<User> GetOrCreateUsers(List<string> usernames) {
         Thread.Sleep(5);
@@ -49,6 +49,6 @@ public class FlatMockDatabase : IDatabase {
     }
     public RoomRetrieveResponseContract GetRoom(RoomRetrieveContract roomRetrieveContract) {
         Thread.Sleep(5);
-        return new RoomRetrieveResponseContract(true, "Room Retrieved", "1", new());
+        return new RoomRetrieveResponseContract(roomRetrieveContract.runIndexIdentifier, true, "Room Retrieved", "1", new());
     }
 }

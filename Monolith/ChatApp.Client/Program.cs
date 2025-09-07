@@ -5,7 +5,7 @@ using Chat.Common;
 using ChatApp.Client;
 var client = new HttpClient { BaseAddress = new Uri(Addresses.CHAT_MONOLITH_SERVICE) };
 
-
+string runIndexIdentifier = Guid.NewGuid().ToString();
 Console.WriteLine("Welcome to the ChatRoom Application!");
 Console.Write("Please provide your username(use ',' to separate):");
 var currentUser = Console.ReadLine();
@@ -28,16 +28,16 @@ if (currentReceivers is null || currentReceivers.Length == 0) {
 client.GetWelcomeMessage();
 
 // Get room information
-var room = await client.GetRoomAsync(currentUser, currentReceivers);
+var room = await client.GetRoomAsync(runIndexIdentifier,currentUser, currentReceivers);
 
 // Get chat history between current user and receiver
-await client.GetChatHistory(room.RoomId);
+await client.GetChatHistory(runIndexIdentifier,room.RoomId);
 
 Task.Run(() => {
     while (true) {
         Thread.Sleep(2000);
         // Fetch last messages from the chat history
-        client.FetchLastMessages(room.RoomId);
+        client.FetchLastMessages(runIndexIdentifier, room.RoomId);
     }
 });
 
@@ -55,7 +55,7 @@ do {
         // Process the Message and send it to the server
         if (!string.IsNullOrWhiteSpace(input)) {
             // Add Message to chat view or send to server
-            client.SendMessageAsync(new(currentUser, room.RoomId, input, DateTime.Now))
+            client.SendMessageAsync(new(runIndexIdentifier,currentUser, room.RoomId, input, DateTime.Now))
                 .ContinueWith(task => {
                     if (!task.Result.Success) {
                         Console.WriteLine("Failed to send Message: " + task.Result.Message);

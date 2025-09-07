@@ -35,7 +35,7 @@ app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContrac
     var start = Stopwatch.StartNew();
 
     var response = await dbClient.PostAsJsonAsync("/getMessages",
-        new HistoryRetrieveContract(historyContract.RoomId, historyContract.StartDate, historyContract.Limit));
+        new HistoryRetrieveContract(historyContract.runIndexIdentifier, historyContract.RoomId, historyContract.StartDate, historyContract.Limit));
 
     var historyResponse = await response.Content.ReadFromJsonAsync<HistoryResponseContract>();
 
@@ -45,7 +45,8 @@ app.MapPost("/history", async ([FromBody] HistoryRetrieveContract historyContrac
 
 
     var subTag = new BenchmarkSubTag(
-        "Microservice/History/history",
+        "ChatHistoryService",
+        "Microservice/ChatHistoryService/history",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),
         GC.GetTotalAllocatedBytes()

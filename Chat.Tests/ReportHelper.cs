@@ -71,61 +71,21 @@ public class ReportHelper {
         sb.AppendLine("\n\n-- Final Benchmark Report --\n");
 
         var allMicroserviceReports = microserviceTester.Select(t => t.Report(out _)).ToList();
+        foreach (var rep in allMicroserviceReports) {
+            foreach (var data in rep.DataList) {
+                foreach (var subTag in data.Tag.SubTags) {
+                    if (subTag.Origin.Contains("ChatDatabaseService")) {
+                        data.Tag.SubTags.Remove(subTag);
+                        break;
+                    }
+                }
+            }
+        }
         var allMonolithReports = monolithTester.Select(t => t.Report(out _)).ToList();
-
         // ERROR: Exception when there is only data with the value of 0
         //
-        var microserviceFullReport = allMicroserviceReports.SelectMany(x => x.SubReports)
-            .GroupBy(x => x.Endpoint)
-            .Select(g => new FullReportModel {
-                Endpoint = g.Key,
-                Count = g.Count(),
-                ServerType = "microservice",
-                MinMinDuration = g.Min(d => d.MinDurationMs),
-                MinAvgDuration = g.Average(d => d.MinDurationMs),
-                MinMaxDuration = g.Max(d => d.MinDurationMs),
-                AvgMinDuration = g.Min(d => d.AvgDurationMs),
-                AvgAvgDuration = g.Average(d => d.AvgDurationMs),
-                AvgMaxDuration = g.Max(d => d.AvgDurationMs),
-                MaxMinDuration = g.Min(d => d.MaxDurationMs),
-                MaxAvgDuration = g.Average(d => d.MaxDurationMs),
-                MaxMaxDuration = g.Max(d => d.MaxDurationMs),
-                MinMinAllocatedBytes = g.Min(d => d.MinAllocatedBytes),
-                MinAvgAllocatedBytes = g.Average(d => d.MinAllocatedBytes),
-                MinMaxAllocatedBytes = g.Max(d => d.MinAllocatedBytes),
-                AvgMinAllocatedBytes = g.Min(d => d.AvgAllocatedBytes),
-                AvgAvgAllocatedBytes = g.Average(d => d.AvgAllocatedBytes),
-                AvgMaxAllocatedBytes = g.Max(d => d.AvgAllocatedBytes),
-                MaxMinAllocatedBytes = g.Min(d => d.MaxAllocatedBytes),
-                MaxAvgAllocatedBytes = g.Average(d => d.MaxAllocatedBytes),
-                MaxMaxAllocatedBytes = g.Max(d => d.MaxAllocatedBytes),
-            }).ToList();
-        var monolithFullReport = allMonolithReports.SelectMany(x => x.SubReports)
-            .GroupBy(x => x.Endpoint)
-            .Select(g => new FullReportModel {
-                Endpoint = g.Key,
-                Count = g.Count(),
-                ServerType = "monolith",
-                // Min
-                MinMinDuration = g.Min(d => d.MinDurationMs),
-                MinAvgDuration = g.Average(d => d.MinDurationMs),
-                MinMaxDuration = g.Max(d => d.MinDurationMs),
-                AvgMinDuration = g.Min(d => d.AvgDurationMs),
-                AvgAvgDuration = g.Average(d => d.AvgDurationMs),
-                AvgMaxDuration = g.Max(d => d.AvgDurationMs),
-                MaxMinDuration = g.Min(d => d.MaxDurationMs),
-                MaxAvgDuration = g.Average(d => d.MaxDurationMs),
-                MaxMaxDuration = g.Max(d => d.MaxDurationMs),
-                MinMinAllocatedBytes = g.Min(d => d.MinAllocatedBytes),
-                MinAvgAllocatedBytes = g.Average(d => d.MinAllocatedBytes),
-                MinMaxAllocatedBytes = g.Max(d => d.MinAllocatedBytes),
-                AvgMinAllocatedBytes = g.Min(d => d.AvgAllocatedBytes),
-                AvgAvgAllocatedBytes = g.Average(d => d.AvgAllocatedBytes),
-                AvgMaxAllocatedBytes = g.Max(d => d.AvgAllocatedBytes),
-                MaxMinAllocatedBytes = g.Min(d => d.MaxAllocatedBytes),
-                MaxAvgAllocatedBytes = g.Average(d => d.MaxAllocatedBytes),
-                MaxMaxAllocatedBytes = g.Max(d => d.MaxAllocatedBytes),
-            }).ToList();
+        var microserviceFullReport = GetFullReportFromBenchmarkReports(allMicroserviceReports, "microservice");
+        var monolithFullReport = GetFullReportFromBenchmarkReports(allMonolithReports, "monolith");
 
         var table = new BetterConsoles.Tables.Table(TableConfig.Unicode());
         var all = new List<FullReportModel>();
@@ -135,6 +95,24 @@ public class ReportHelper {
         sb.AppendLine(table.ToString());
 
         return sb.ToString();
+    }
+    private List<FullReportModel> GetFullReportFromBenchmarkReports(List<BenchmarkReport> allMicroserviceReports, string serverType) {
+        return allMicroserviceReports.SelectMany(x => x.SubReports)
+            .GroupBy(x => x.Endpoint)
+            .Select(g => new FullReportModel {
+                Endpoint = g.Key,
+                Count = g.Count(),
+                ServerType = serverType,
+                MinMinDuration = g.Min(d => d.MinDurationMs),
+                MinAvgDuration = g.Average(d => d.MinDurationMs),
+                MinMaxDuration = g.Max(d => d.MinDurationMs),
+                AvgMinDuration = g.Min(d => d.AvgDurationMs),
+                AvgAvgDuration = g.Average(d => d.AvgDurationMs),
+                AvgMaxDuration = g.Max(d => d.AvgDurationMs),
+                MaxMinDuration = g.Min(d => d.MaxDurationMs),
+                MaxAvgDuration = g.Average(d => d.MaxDurationMs),
+                MaxMaxDuration = g.Max(d => d.MaxDurationMs)
+            }).ToList();
     }
 
     public string CreateReport(BenchmarkTesterBase tester, out BenchmarkReport benchmarkReport) {
@@ -198,12 +176,15 @@ public record FullReportModel {
     public string Endpoint { get; set; }
     public int Count { get; set; }
     public string ServerType { get; set; }
+    public float DataMin { get; set; }
     public float MinMinDuration { get; set; }
     public float MinAvgDuration { get; set; }
     public float MinMaxDuration { get; set; }
+    public float DataAvg { get; set; }
     public float AvgMinDuration { get; set; }
     public float AvgAvgDuration { get; set; }
     public float AvgMaxDuration { get; set; }
+    public float DataMax { get; set; }
     public float MaxMinDuration { get; set; }
     public float MaxAvgDuration { get; set; }
     public float MaxMaxDuration { get; set; }

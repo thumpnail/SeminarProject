@@ -46,7 +46,7 @@ public class FastDBDatabase : IDatabase {
         roomCollection.Update(Guid.Parse(room.Id), room);
         messagesCollection.Update(Guid.Parse(message.Id), message);
 
-        return new MessageSendResponseContract(message.Content, true, new());
+        return new MessageSendResponseContract(messageSendContract.runIndexIdentifier, message.Content, true, new());
     }
 
     /// <inheritdoc/>
@@ -57,7 +57,7 @@ public class FastDBDatabase : IDatabase {
             .Where(x => x.ChatRoom.Id.Equals(historyRetrieveContract.RoomId))
             .Where(x => x.Timestamp > historyRetrieveContract.StartDate)
             .ToList();
-        return new HistoryResponseContract(messages, true, new());
+        return new HistoryResponseContract(historyRetrieveContract.runIndexIdentifier, messages, true, new());
     }
     /// <inheritdoc/>
     public List<User> GetOrCreateUsers(params List<string> usernames) {
@@ -125,6 +125,6 @@ public class FastDBDatabase : IDatabase {
 
         UpdateRoomWithUsers(room, users);
 
-        return new RoomRetrieveResponseContract(true, string.Empty, RoomId: room.Id, new());
+        return new RoomRetrieveResponseContract(roomRetrieveContract.runIndexIdentifier, true, string.Empty, RoomId: room.Id, new());
     }
 }

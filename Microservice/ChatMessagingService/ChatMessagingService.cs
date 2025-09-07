@@ -49,14 +49,15 @@ app.MapPost("/send", async ([FromBody] MessageSendContract msgSend) => {
     start.Stop();
 
     if (msgSendResponse is null) {
-        return Results.Json(new MessageSendResponseContract("Failed to send Message", false, msgSendResponse.Tag));
+        return Results.Json(new MessageSendResponseContract(msgSend.runIndexIdentifier, "Failed to send Message", false, msgSendResponse.Tag));
     }
 
     logger.Log("/send", $"Post '/insertMessage' took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
     //appLogger.LogInformation(new EventId(1, "MessageSent"), $"/send Post '/insertMessage' took {start.ElapsedMilliseconds} ms");
 
     var subTag = new BenchmarkSubTag(
-        "Microservice/MessagingService/send",
+        "ChatMessagingService",
+        "Microservice/ChatMessagingService/send",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),
         GC.GetTotalAllocatedBytes()
@@ -73,7 +74,7 @@ app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
     var start = Stopwatch.StartNew();
 
     var roomResponse = await dbClient.PostAsJsonAsync("/getroom",
-        new RoomRetrieveContract(room.Sender, room.Receivers));
+        new RoomRetrieveContract(room.runIndexIdentifier, room.Sender, room.Receivers));
 
     var parsedRoom = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
 
@@ -87,7 +88,8 @@ app.MapPost("/room", async ([FromBody] RoomRetrieveContract room) => {
     //appLogger.LogInformation(new EventId(2, "RoomRetrieved"), $"/room Post '/getroom' took {start.ElapsedMilliseconds} ms");
 
     var subTag = new BenchmarkSubTag(
-        "Microservice/MessagingService/room",
+        "ChatMessagingService",
+        "Microservice/ChatMessagingService/room",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),
         GC.GetTotalAllocatedBytes()

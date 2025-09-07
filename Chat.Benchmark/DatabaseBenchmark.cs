@@ -10,6 +10,7 @@ namespace Chat.Benchmark;
 public class DatabaseBenchmark {
     IDatabase localDatabase = new LocalDatabase();
     IDatabase liteDatabase = new LiteBasedDatabase();
+    string runIndexIdentifier = Guid.NewGuid().ToString();
 
     [Params(100,1000)]
     public int maxMessages = 1000;
@@ -21,18 +22,18 @@ public class DatabaseBenchmark {
 
     [Benchmark]
     public void RunBenchmarkLocalDB() {
-        var users = localDatabase.GetRoom(new("benchmarkUser", new[] { "receiver1", "receiver2" }));
-        var response = localDatabase.GetMessages(new(users.RoomId, DateTime.Now));
+        var users = localDatabase.GetRoom(new(runIndexIdentifier,"benchmarkUser", new[] { "receiver1", "receiver2" }));
+        var response = localDatabase.GetMessages(new(runIndexIdentifier,users.RoomId, DateTime.Now));
         for (int i = 0; i < maxMessages ; i++) {
-            var message = localDatabase.InsertMessage(new("benchmarkUser", users.RoomId, $"This is a benchmark message {i}", DateTime.Now));
+            var message = localDatabase.InsertMessage(new(runIndexIdentifier,"benchmarkUser", users.RoomId, $"This is a benchmark message {i}", DateTime.Now));
         }
     }
     [Benchmark]
     public void RunBenchmarkLiteDB() {
-        var users = liteDatabase.GetRoom(new("benchmarkUser", new[] { "receiver1", "receiver2" }));
-        var response = liteDatabase.GetMessages(new(users.RoomId, DateTime.Now));
+        var users = liteDatabase.GetRoom(new(runIndexIdentifier,"benchmarkUser", new[] { "receiver1", "receiver2" }));
+        var response = liteDatabase.GetMessages(new(runIndexIdentifier,users.RoomId, DateTime.Now));
         for (int i = 0; i < maxMessages ; i++) {
-            var message = liteDatabase.InsertMessage(new("benchmarkUser", users.RoomId, $"This is a benchmark message {i}", DateTime.Now));
+            var message = liteDatabase.InsertMessage(new(runIndexIdentifier,"benchmarkUser", users.RoomId, $"This is a benchmark message {i}", DateTime.Now));
         }
     }
 }

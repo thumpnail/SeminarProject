@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+
+using Chat.Common.Contracts;
+
 using LiteDB;
 
 namespace Chat.Tests {
@@ -7,6 +10,7 @@ namespace Chat.Tests {
         private readonly LiteDatabase db;
         private readonly ILiteCollection<Data> dataCollection;
         private readonly ILiteCollection<BenchmarkReport> reportCollection;
+        private readonly ILiteCollection<BenchmarkTag> tagCollection;
 
         private int lastHttpStatusCode;
 
@@ -18,6 +22,7 @@ namespace Chat.Tests {
 
         public IEnumerable<Data> GetDataCollection() => dataCollection.FindAll();
         public IEnumerable<BenchmarkReport> GetReportCollection() => reportCollection.FindAll();
+        public IEnumerable<BenchmarkTag> GetTagCollection() => tagCollection.FindAll();
 
         public void InsertData(Data data) {
             lock (dataCollection) {
@@ -31,10 +36,20 @@ namespace Chat.Tests {
                 reportCollection.Insert(report);
             }
         }
+        public void InsertTag(BenchmarkTag tag) {
+            lock (tagCollection) {
+                tagCollection.Insert(tag);
+            }
+        }
 
         public List<Data> FindDataByRunIndex(string runIndexIdentifier) {
             lock (dataCollection) {
                 return dataCollection.Find(x => x.RunIndexIdentifier == runIndexIdentifier).ToList();
+            }
+        }
+        public List<BenchmarkTag> FindTagsByRunIndex(string runIndexIdentifier) {
+            lock (tagCollection) {
+                return tagCollection.Find(x => x.RunIndexIdentifier == runIndexIdentifier).ToList();
             }
         }
 

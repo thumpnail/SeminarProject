@@ -7,7 +7,7 @@ using Chat.Common.Contracts;
 using Chat.Common.Models;
 
 DateTime lastMessageTimestamp = DateTime.MinValue;
-
+string runIndexIdentifier = Guid.NewGuid().ToString();
 HttpClient messagingClient = new() { BaseAddress = new Uri(Addresses.CHAT_MESSAGING_SERVICE) };
 HttpClient historyClient = new() { BaseAddress = new Uri(Addresses.CHAT_HISTORY_SERVICE) };
 
@@ -58,7 +58,7 @@ do {
         // Process the Message and send it to the server
         if (!string.IsNullOrWhiteSpace(input)) {
             // Add Message to chat view or send to server
-            SendMessageAsync(new(currentUser, roomId, input, DateTime.Now))
+            SendMessageAsync(new(runIndexIdentifier, currentUser, roomId, input, DateTime.Now))
                 .ContinueWith((task) => {
                     if (!task.Result.Success) {
                         Console.WriteLine("Failed to send Message: " + task.Result.Message);
@@ -80,7 +80,7 @@ async Task<MessageSendResponseContract> SendMessageAsync(MessageSendContract mes
         return await response.Content.ReadFromJsonAsync<MessageSendResponseContract>();
     }
     Console.WriteLine("System Failed to send Message.");
-    return new MessageSendResponseContract("Failed to send Message.", false, new BenchmarkTag());
+    return new MessageSendResponseContract(runIndexIdentifier, "Failed to send Message.", false, new BenchmarkTag());
 }
 // This method retrieves the welcome Message from the chat service
 void GetWelcomeMessage(HttpClient httpClient) {
@@ -93,7 +93,7 @@ void GetWelcomeMessage(HttpClient httpClient) {
 }
 async Task<string> GetRoomAsync(string sender, string[] receivers) {
     var roomResponse = await messagingClient.PostAsJsonAsync("/room",
-        new RoomRetrieveContract(sender, receivers));
+        new RoomRetrieveContract(runIndexIdentifier, sender, receivers));
 
     if (roomResponse.IsSuccessStatusCode) {
         var room = await roomResponse.Content.ReadFromJsonAsync<RoomRetrieveResponseContract>();
@@ -107,7 +107,7 @@ async Task<string> GetRoomAsync(string sender, string[] receivers) {
 }
 async Task FetchLastMessages(string roomId) {
     currentReceivers.Order();
-    var historyRetrieveContract = new HistoryRetrieveContract(roomId, lastMessageTimestamp, -1);
+    var historyRetrieveContract = new HistoryRetrieveContract(runIndexIdentifier, roomId, lastMessageTimestamp, -1);
     lastMessageTimestamp = DateTime.Now;
     var historyResponse = await historyClient.PostAsJsonAsync("/history", historyRetrieveContract);
     if (historyResponse.IsSuccessStatusCode) {
@@ -126,7 +126,7 @@ async Task GetChatHistory(string roomId) {
     // Sort the Receivers to ensure consistent room ID generation
     currentReceivers.Order();
     // Retrieve the chat history for the room
-    var historyResponse = await historyClient.PostAsJsonAsync("/history", new HistoryRetrieveContract(roomId, lastMessageTimestamp, 50));
+    var historyResponse = await historyClient.PostAsJsonAsync("/history", new HistoryRetrieveContract(runIndexIdentifier, roomId, lastMessageTimestamp, 50));
     if (historyResponse.IsSuccessStatusCode) {
         // Read the response content as HistoryResponseContract
         var history = await historyResponse.Content.ReadFromJsonAsync<HistoryResponseContract>();

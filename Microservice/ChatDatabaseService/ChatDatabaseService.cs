@@ -34,7 +34,7 @@ ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>()
 Logger logger = new("ChatDatabaseService");
 FlatMockDatabase database = new("../../../../../chat-microservice.db");
 // Beispiel-Endpunkt
-app.MapGet("/", () => "Type=ChatDatabaseService");
+app.MapGet("/", () => $"Type=ChatDatabaseService;DBType={database.GetType().Name}");
 
 app.MapPost("/insertMessage", async ([FromBody] MessageSendContract messageSendContract) => {
     var start = Stopwatch.StartNew();
@@ -44,8 +44,9 @@ app.MapPost("/insertMessage", async ([FromBody] MessageSendContract messageSendC
     logger.Log("/insertMessage", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
     //appLogger.LogInformation(new EventId(1, "MessageInserted"), $"/insertMessage took {start.ElapsedMilliseconds} ms");
 
-    var tag = new BenchmarkTag([
+    var tag = new BenchmarkTag(messageSendContract.runIndexIdentifier,[
         new(
+            "ChatDatabaseService",
             "Microservice/ChatDatabaseService/insertMessage",
             start.ElapsedMilliseconds,
             GC.GetAllocatedBytesForCurrentThread(),
@@ -65,8 +66,9 @@ app.MapPost("/getMessages", async ([FromBody] HistoryRetrieveContract historyRet
     logger.Log("/getMessages", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
     //appLogger.LogInformation(new EventId(2, "MessagesRetrieved"), $"/getMessages took {start.ElapsedMilliseconds} ms");
 
-    var tag = new BenchmarkTag([
+    var tag = new BenchmarkTag(historyRetrieveContract.runIndexIdentifier, [
         new(
+            "ChatDatabaseService",
             "Microservice/ChatDatabaseService/getMessages",
             start.ElapsedMilliseconds,
             GC.GetAllocatedBytesForCurrentThread(),
@@ -86,8 +88,13 @@ app.MapPost("/getroom", async ([FromBody] RoomRetrieveContract roomRetrieveContr
     logger.Log("/getroom", $"Took {start.ElapsedMilliseconds} ms|{start.Elapsed.Microseconds} ns");
     //appLogger.LogInformation(new EventId(3, "RoomRetrieved"), $"/getroom took {start.ElapsedMilliseconds} ms");
 
-    var tag = new BenchmarkTag([
-        new("Microservice/ChatDatabaseService/getroom", start.ElapsedMilliseconds, GC.GetAllocatedBytesForCurrentThread(), GC.GetTotalAllocatedBytes())
+    var tag = new BenchmarkTag(roomRetrieveContract.runIndexIdentifier,[
+        new(
+            "ChatDatabaseService",
+            "Microservice/ChatDatabaseService/getroom",
+            start.ElapsedMilliseconds,
+            GC.GetAllocatedBytesForCurrentThread(),
+            GC.GetTotalAllocatedBytes())
     ]);
 
     return Results.Json(

@@ -1,6 +1,6 @@
 ﻿using Chat.Common.Contracts;
 
-public class Data {
+public record Data {
     public string RunIndexIdentifier { get; set; }
     public string Type { get; set; }
     public string Endpoint { get; set; }

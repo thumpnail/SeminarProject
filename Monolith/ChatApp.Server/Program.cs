@@ -32,7 +32,7 @@ Logger logger = new("ChatMonolith");
 FlatMockDatabase database = new("../../../../../chat-monolith.db");
 
 // Define a simple endpoint
-app.MapGet("/", () => "Type=ChatMessagingService");
+app.MapGet("/", () => $"Type=ChatMonolithServer;DBType={database.GetType().Name}");
 
 app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
     var start = Stopwatch.StartNew();
@@ -44,6 +44,7 @@ app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
 
     // benchmarking
     var subTag = new BenchmarkSubTag(
+        "ChatMonolithServer",
         "Monolith/send",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),
@@ -53,6 +54,7 @@ app.MapPost("/send", ([FromBody] MessageSendContract messageSendContract) => {
     newTag.SubTags.Add(subTag);
 
     return Results.Json(new MessageSendResponseContract(
+        messageSendContract.runIndexIdentifier,
         messageSendContract.Content,
         true,
         newTag));
@@ -68,6 +70,7 @@ app.MapPost("/history", ([FromBody] HistoryRetrieveContract historyRetrieveContr
 
     // benchmarking
     var subTag = new BenchmarkSubTag(
+        "ChatMonolithServer",
         "Monolith/history",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),
@@ -90,6 +93,7 @@ app.MapPost("/room", ([FromBody] RoomRetrieveContract roomRetrieveContract) => {
     //appLogger.LogInformation(new EventId(3, "RoomRetrieved"), $"/room GetRoom took {start.ElapsedMilliseconds} ms");
 
     var subTag = new BenchmarkSubTag(
+        "ChatMonolithServer",
         "Monolith/room",
         start.ElapsedMilliseconds,
         GC.GetAllocatedBytesForCurrentThread(),

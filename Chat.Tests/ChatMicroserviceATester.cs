@@ -21,6 +21,14 @@ namespace Chat.Tests {
                 BaseAddress = new(Chat.Common.Addresses.CHAT_HISTORY_SERVICE),
                 Timeout = TimeSpan.FromSeconds(200)
             };
+            var databaseClient = new HttpClient {
+                BaseAddress = new(Chat.Common.Addresses.CHAT_DB_SERVICE),
+                Timeout = TimeSpan.FromSeconds(200)
+            };
+
+            // Get database information
+            databaseInfo = GetDatabaseInfo(databaseClient).Result;
+
             var sender = "";
             var receiver = "";
             do {
@@ -37,7 +45,8 @@ namespace Chat.Tests {
                     sender, receiver,
                     out DateTime getRoomStart,
                     out float roomDuration,
-                    out BenchmarkTag roomTags);
+                    out BenchmarkTag roomTag);
+            benchmarkDatabase.InsertTag(roomTag);
 
             // Get chat history
             GetChatHistory(benchmarkDatabase,
@@ -48,6 +57,7 @@ namespace Chat.Tests {
                 out DateTime getHistoryStart,
                 out float historyDuration,
                 out BenchmarkTag historyTags);
+            benchmarkDatabase.InsertTag(historyTags);
 
             // Send messages
             for (int msgIdx = 0; msgIdx < msgCount; msgIdx++) {
@@ -61,7 +71,8 @@ namespace Chat.Tests {
                     receiver,
                     out DateTime msgStart,
                     out Task<MessageSendResponseContract> sendTask,
-                    out BenchmarkTag sendTags);
+                    out BenchmarkTag sendTag);
+                benchmarkDatabase.InsertTag(sendTag);
             }
         }
     }

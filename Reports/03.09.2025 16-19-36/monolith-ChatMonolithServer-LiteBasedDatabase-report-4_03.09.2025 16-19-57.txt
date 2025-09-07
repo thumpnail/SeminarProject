@@ -1,0 +1,41 @@
+
+
+-- Benchmark Results --
+
+ChatMonolithATester Benchmark Report
+
+Run Index Identifier: 322b52c9-9d8a-48b5-9d34-a60d8f5e3f9c
+Anzahl Threads: 100
+Anzahl Nachrichten pro Thread: 10
+Thread Throttle: 0 ms
+Startzeit: 16:20:00.890
+Endzeit: 16:20:03.467
+Dauer: 2,577 Sekunden
+
+Benchmark abgeschlossen: 1188 Requests verarbeitet.
+Endpoint: /room
+  Requests: 99
+  Avg Duration: 275,98 ms
+  Min Duration: 17,94 ms
+  Max Duration: 783,62 ms
+  Avg Allocated Bytes: 42372,24 MB
+  Min Allocated Bytes: 41907,00 MB
+  Max Allocated Bytes: 43266,00 MB
+Endpoint: /history
+  Requests: 99
+  Avg Duration: 1013,32 ms
+  Min Duration: 458,03 ms
+  Max Duration: 1322,22 ms
+  Avg Allocated Bytes: 15028,21 MB
+  Min Allocated Bytes: 0,00 MB
+  Max Allocated Bytes: 46931,00 MB
+Endpoint: /send
+  Requests: 990
+  Avg Duration: 102,23 ms
+  Min Duration: 2,96 ms
+  Max Duration: 813,20 ms
+  Avg Allocated Bytes: 47467,88 MB
+  Min Allocated Bytes: 45700,00 MB
+  Max Allocated Bytes: 48269,00 MB
+
+

@@ -1,7 +1,9 @@
-﻿namespace Chat.Tests {
+﻿using Chat.Common.Contracts;
+namespace Chat.Tests {
     public class InMemoryBenchmarkDatabase : IBenchmarkDatabase {
         private readonly List<Data> dataCollection = new();
         private readonly List<BenchmarkReport> reportCollection = new();
+        private readonly List<BenchmarkTag> tagCollection = new();
         private int lastHttpStatusCode;
 
         public InMemoryBenchmarkDatabase(string connectionString) {
@@ -13,6 +15,9 @@
         }
         public IEnumerable<BenchmarkReport> GetReportCollection() {
             return reportCollection;
+        }
+        public IEnumerable<BenchmarkTag> GetTagCollection() {
+            return tagCollection;
         }
         public void InsertData(Data data) {
             lock (dataCollection) {
@@ -26,10 +31,20 @@
                 reportCollection.Add(report);
             }
         }
+        public void InsertTag(BenchmarkTag tag) {
+            lock (tagCollection) {
+                tagCollection.Add(tag);
+            }
+        }
 
         public List<Data> FindDataByRunIndex(string runIndexIdentifier) {
             lock (dataCollection) {
                 return dataCollection.Where(x => x.RunIndexIdentifier == runIndexIdentifier).ToList();
+            }
+        }
+        public List<BenchmarkTag> FindTagsByRunIndex(string runIndexIdentifier) {
+            lock (tagCollection) {
+                return tagCollection.Where(x => x.RunIndexIdentifier == runIndexIdentifier).ToList();
             }
         }
 

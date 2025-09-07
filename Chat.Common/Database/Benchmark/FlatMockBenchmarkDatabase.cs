@@ -1,4 +1,5 @@
-﻿namespace Chat.Tests;
+﻿using Chat.Common.Contracts;
+namespace Chat.Tests;
 
 public class FlatMockBenchmarkDatabase : IBenchmarkDatabase {
 
@@ -12,13 +13,24 @@ public class FlatMockBenchmarkDatabase : IBenchmarkDatabase {
         Thread.Sleep(5);
         return Enumerable.Empty<BenchmarkReport>();
     }
+    public IEnumerable<BenchmarkTag> GetTagCollection() {
+        Thread.Sleep(5);
+        return Enumerable.Empty<BenchmarkTag>();
+    }
     public void InsertData(Data data) {
         Thread.Sleep(5);
     }
     public void InsertReport(BenchmarkReport report) {
         Thread.Sleep(5);
     }
+    public void InsertTag(BenchmarkTag tag) {
+        Thread.Sleep(5);
+    }
     public List<Data> FindDataByRunIndex(string runIndexIdentifier) {
+        Thread.Sleep(5);
+        return [];
+    }
+    public List<BenchmarkTag> FindTagsByRunIndex(string runIndexIdentifier) {
         Thread.Sleep(5);
         return [];
     }

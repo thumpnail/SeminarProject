@@ -1,0 +1,41 @@
+
+
+-- Benchmark Results --
+
+ChatMicroserviceATester Benchmark Report
+
+Run Index Identifier: f5725971-0306-45cb-a9e0-e6c7ef3e6dfb
+Anzahl Threads: 100
+Anzahl Nachrichten pro Thread: 10
+Thread Throttle: 0 ms
+Startzeit: 18:01:35.904
+Endzeit: 18:01:39.637
+Dauer: 3,732 Sekunden
+
+Benchmark abgeschlossen: 1200 Requests verarbeitet.
+Endpoint: /room
+  Requests: 100
+  Avg Duration: 476,90 ms
+  Min Duration: 18,06 ms
+  Max Duration: 1789,41 ms
+  Avg Allocated Bytes: 25387,75 MB
+  Min Allocated Bytes: 24682,00 MB
+  Max Allocated Bytes: 28348,00 MB
+Endpoint: /history
+  Requests: 100
+  Avg Duration: 1457,92 ms
+  Min Duration: 497,31 ms
+  Max Duration: 1955,66 ms
+  Avg Allocated Bytes: 10919,94 MB
+  Min Allocated Bytes: 0,00 MB
+  Max Allocated Bytes: 31803,00 MB
+Endpoint: /send
+  Requests: 1000
+  Avg Duration: 142,68 ms
+  Min Duration: 4,46 ms
+  Max Duration: 847,18 ms
+  Avg Allocated Bytes: 32374,14 MB
+  Min Allocated Bytes: 28311,00 MB
+  Max Allocated Bytes: 33458,00 MB
+
+

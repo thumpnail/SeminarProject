@@ -1,182 +1,208 @@
-﻿# Seminar Project – Monolith vs. Microservices Chat Architecture
+﻿# Monolith vs. Microservices Chat – Benchmark & Analysis Platform
 
-> Comparative study and benchmark framework for evaluating monolithic vs. microservice-based chat system architectures.
+> Comparative study platform measuring performance characteristics of a chat application implemented as a Monolith and as decomposed Microservices.
 
-<!-- Badges (replace placeholders as needed) -->
 ![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
 ![.NET](https://img.shields.io/badge/.NET-8.0+-512BD4.svg?logo=dotnet&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-available-blue)
-<!-- Add a real license badge once a LICENSE file is added -->
+![Architecture](https://img.shields.io/badge/architectures-monolith%20%7C%20microservices-blueviolet)
+![Benchmarks](https://img.shields.io/badge/benchmarks-automated-orange)
+![Tests](https://img.shields.io/badge/tests-included-blue)
+<!-- TODO: Add CI badge / License badge once available -->
 
 ---
 
-## Table of Contents
-1. Overview
-2. Project Goals
-3. Features
-4. Architecture Overview
-5. Tech Stack
-6. Repository Structure
-7. Quick Start
-8. Running Benchmarks & Tests
-9. Reports & Analysis
-10. Development Workflow
-11. Contributing
-12. Roadmap
-13. Project Status
+## Contents
+1. Motivation & Scope
+2. Key Capabilities
+3. Architecture Summary
+4. Tech Stack
+5. Project Layout
+6. Quick Start
+7. Running the Benchmark Suite
+8. Configuration (`TestConfig.yaml`)
+9. Generated Reports & Plots
+10. Data Model & Metrics
+11. Environment & Logging
+12. Extending / Contribution
+13. Roadmap
 14. License
 15. Acknowledgements
 
 ---
 
-## 1. Overview
-This repository hosts a comparative analysis of two architectural approaches for a chat application: a monolithic implementation and a microservice-based implementation. It includes automated benchmarks, reporting utilities, and supporting tooling to evaluate performance, scalability, and maintainability characteristics.
+## 1. Motivation & Scope
+This repository provides an executable comparison between a single-process chat application (Monolith) and a service‑oriented variant (Microservices). It focuses on: latency distribution, request throughput, per-endpoint timing, and qualitative operational differences. Output artifacts are reproducible and versionable.
 
-## 2. Project Goals
-- Provide reproducible benchmarks for Monolith vs. Microservices in a chat context
-- Evaluate latency, throughput, resource usage, and horizontal scaling behavior
-- Automate data collection and report generation
-- Offer a foundation for academic or practical architecture evaluation
+## 2. Key Capabilities
+* Dual runnable architectures (shared contracts in `Chat.Common`)
+* Automated multi‑iteration benchmark harness (`Chat.Tests`)
+* Structured persistence of timing data + per-endpoint aggregation
+* Report generation (per run, combined, final) + PNG plots (OxyPlot)
+* Tagging of operations (`BenchmarkTag`) to correlate timings with memory snapshots
+* Swappable storage implementation (see database info capture in testers)
 
-## 3. Features
-- Dual implementation: Monolith & Microservice chat systems
-- Automated performance & functional test harness (Chat.Tests)
-- Benchmark data aggregation & Markdown / file-based reporting
-- Extensible shared model layer (Chat.Common)
-- Optional tooling for CSV & graph-friendly exports
-
-## 4. Architecture Overview
+## 3. Architecture Summary
 ### Monolith
-- Single deployable unit
-- Shared database layer
-- Lower operational complexity
-- Faster local development
+* Single deployment target (server + lightweight client)
+* Simpler startup & lower coordination overhead
+* Direct in-process interactions
 
 ### Microservices
-- Decomposed services (e.g. Messaging, Persistence/History, possibly Users)
-- Independent scalability of components
-- Explicit inter-service communication
-- Higher operational overhead, more flexibility long-term
+* Separate concerns (Messaging / History / Database / Gateway layering)
+* Network boundaries expose latency & resilience factors
+* Enables selective horizontal scaling & failure isolation
 
-> You can add an architecture diagram (e.g. /docs/architecture.png) and reference it here if desired.
+Diagrams: See `ClassDiagram.png`, `MicroserviceClassDiagram.puml`, `MonolithClassDiagram.puml` (and `Dokumentation/Architecture.png`).
 
-## 5. Tech Stack
-- Language / Runtime: .NET (C#)
-- Containerization: Docker / Docker Compose (optional)
-- Scripting / Analysis: Python (for external tooling)
-- Testing: Custom benchmark & functional suites (Chat.Tests)
+## 4. Tech Stack
+| Domain | Tech |
+|--------|------|
+| Runtime | .NET 8 (C#) |
+| Reporting / Charts | OxyPlot (PNG export) |
+| Serialization | JSON + (MsgPack helper placeholders) |
+| Persistence (benchmark db) | LiteDB / In-memory abstraction |
+| Config | YAML (`TestConfig.yaml`) |
+| Logging | Simple file logger (opt-out via env var) |
 
-## 6. Repository Structure
-- `Chat.Common` – Shared models, interfaces, utilities
-- `Chat.Reporter` – (Currently dormant) Intended for CSV export & reporting helpers
-- `Chat.Tests` – Core benchmark + functional test runner & report generator
-- `Microservice` – Microservice-based chat architecture implementation
-- `Monolith` – Monolithic chat server + client
-- `Reports` – Generated analysis outputs (Markdown, data files, etc.)
-- `Tools` – Auxiliary scripts / data preparation utilities
+## 5. Project Layout
+| Path | Purpose |
+|------|---------|
+| `Chat.Common` | Models (`Message`, `User`, `BenchmarkReport`), contracts & utilities | 
+| `Chat.Tests` | Benchmark + functional test harness, report + plot generation |
+| `Microservice` | Service implementations (Messaging, History, Database, etc.) |
+| `Monolith` | Monolithic server + client |
+| `Reports` | Auto‑generated run artifacts (txt + PNG) |
+| `TestConfig.yaml` | Benchmark parameterization |
+| `Dokumentation/` | German documentation & architecture assets |
 
-## 7. Quick Start
+## 6. Quick Start
 ### Prerequisites
-- .NET SDK 8.0+
-- (Optional) Docker & Docker Compose
-- (Optional) Python 3.x for extended analysis scripts
+* .NET 8 SDK
+* (Optional) Docker for containerization experiments
 
-### Clone
-```
- git clone <repo-url>
- cd SeminarProject
-```
-
-### Build All
-```
- dotnet build
+### Clone & Build
+```powershell
+git clone <repo-url>
+cd SeminarProject
+dotnet build
 ```
 
-### Run Monolith
-```
- cd Monolith
- dotnet run --project Server
- # In another terminal
- dotnet run --project Client
-```
-
-### Run Microservices (Example)
-Option A: Manual
-```
- cd Microservice
- dotnet run --project Service.Messaging
- dotnet run --project Service.History
- dotnet run --project Gateway
-```
-Option B: Docker Compose (add a docker-compose.yml if not present)
-```
- docker compose up --build
+### Run Monolith (example)
+```powershell
+cd Monolith
+dotnet run --project ChatApp.Server
+# (Optional) client shell
+dotnet run --project ChatApp.Client
 ```
 
-### Run Tests / Benchmarks
+### Run Microservices (manually)
+```powershell
+cd Microservice
+dotnet run --project ChatMessagingService
+dotnet run --project ChatHistoryService
+dotnet run --project ChatDatabaseService
+# (If present) gateway / API edge
 ```
- cd Chat.Tests
- dotnet test
+
+Add a `docker-compose.yml` to orchestrate these for reproducible network conditions (future enhancement).
+
+## 7. Running the Benchmark Suite
+Benchmarks execute through `Chat.Tests` and spawn architecture‑specific testers (`ChatMicroserviceATester`, `ChatMonolithATester`) derived from `BenchmarkTesterBase`.
+
+```powershell
+cd Chat.Tests
+dotnet test
 ```
-(If benchmarks are separated, provide specific commands here.)
 
-### Generate Reports
-Reports are emitted automatically into `Reports/` (Markdown + data files). Ensure the folder exists or is created on first run.
+Workflow performed per iteration:
+1. Spawn testers (monolith + microservice) with configured thread/message counts
+2. Threads issue: room acquisition -> message sends -> history retrieval
+3. Raw request records stored (endpoint, duration, sender/receiver, tag)
+4. Per-endpoint aggregation -> `BenchmarkReport` persisted
+5. Combined + final summaries & plots exported to `Reports/<timestamp>/`
 
-## 8. Running Benchmarks & Tests
-Typical workflow:
-1. Ensure both architectures are buildable.
-2. Optionally start required services (for microservice mode).
-3. Execute `dotnet test` inside `Chat.Tests`.
-4. Inspect `Reports/` for generated summaries, raw metrics, or CSV exports (if enabled).
+## 8. Configuration (`TestConfig.yaml`)
+Example (current default):
+```yaml
+MAX_ITERATIONS: 5
+ITERATION_THROTTLE: 0
+MAX_THREADS: 10
+MAX_MESSAGES: 25
+THREAD_THROTTLE: 0
+```
+Meaning:
+* MAX_ITERATIONS – how many benchmark passes (produces series & final report)
+* MAX_THREADS – concurrent simulated users per tester
+* MAX_MESSAGES – messages per thread
+* THREAD_THROTTLE – ms delay between starting worker threads
+* ITERATION_THROTTLE – delay between iterations
 
-> Extend this section with concrete metric examples once stable.
+Tune to shape load curves (e.g. ramp concurrency, stress endpoints). Keep an eye on resource saturation when scaling up.
 
-## 9. Reports & Analysis
-- Default output: Markdown summaries + structured result files
-- (Planned) CSV exports for external plotting (Grafana, Python, etc.)
-- Suggested next step: add charts (e.g. latency distributions, throughput trends) using a `/docs` or `/notebooks` directory
+## 9. Generated Reports & Plots
+Artifacts per run folder (`Reports/<runTimestamp>/`):
+* `microservice-*-report-<i>_<iterationTime>.txt`
+* `monolith-*-report-<i>_<iterationTime>.txt`
+* `combine-report-...txt` (pairwise comparison for iteration)
+* `final-report-_<mainRunTime>_micro_*_mono_*.txt` (aggregate across iterations)
+* `final-plot-*.png` (OxyPlot charts; endpoint latency & throughput comparisons)
 
-## 10. Development Workflow
-- Standard Git branching (e.g. `main` + feature branches)
-- Add tests for any benchmarking or architectural changes
-- Keep shared contracts in `Chat.Common` stable; version if necessary
-- Consider adding Git hooks or CI for automated benchmark runs (future enhancement)
+Each report includes:
+* Thread & message configuration
+* Timing window (start / end / duration seconds)
+* Per-endpoint: count, avg, min, max (ms)
+* Invalid HTTP status occurrences (`InvalidStatusCodeCount`)
 
-## 11. Contributing
-Contributions welcome. Suggested process:
-1. Open an issue describing proposed change
-2. Create feature branch
-3. Add / update tests & documentation
-4. Submit Pull Request with concise summary
+## 10. Data Model & Metrics
+`BenchmarkReport` structure (selected fields):
+* RunIndexIdentifier
+* ThreadCount / MsgCount / ThreadThrottle
+* Duration (seconds)
+* InvalidStatusCodeCount
+* SubReports[]: per-endpoint aggregates (Count, AvgDurationMs, MinDurationMs, MaxDurationMs)
+* DataList: raw filtered rows for the service type
 
-## 12. Roadmap
-- [ ] Finalize microservice decomposition boundaries
-- [ ] Add architecture diagrams
-- [ ] Implement / revive Reporter CSV export pipeline
-- [ ] Introduce baseline latency & throughput charts
-- [ ] Add CI pipeline (build + test + report artifact upload)
-- [ ] Add configurable load profiles (users, message frequency)
-- [ ] Integrate docker-compose for full microservice orchestration
-- [ ] Optional: Add gRPC or message queue variant
+Contracts (`Chat.Common.Contracts`) define message send / history / room operations and attach a `BenchmarkTag` (with timestamp + memory snapshot fields) for potential deeper analysis.
 
-## 13. Project Status
-Actively evolving. Reporter component currently minimal / dormant; core benchmarking flows functional.
+## 11. Environment & Logging
+File logging is enabled unless environment variable `DISABLE_FILE_LOG=1` is set. Logs written near project root: `log_<Origin>.log`.
+
+Planned enhancements:
+* Structured (JSON) log emission
+* Optional log level filtering
+
+## 12. Extending / Contribution
+Ideas:
+* Add persistence abstraction benchmarks (swap LiteDB / SQLite / PostgreSQL)
+* Inject artificial latency / failure for resilience scenarios
+* CI pipeline executing reduced iteration config
+* Export CSV / parquet for external analytics
+
+Contribution flow:
+1. Fork / branch
+2. Change + add tests
+3. Update docs / diagrams
+4. PR with concise rationale
+
+## 13. Roadmap
+| Stage | Item |
+|-------|------|
+| Short | Add license, CI workflow, Docker orchestration |
+| Short | CSV export module (`Chat.Reporter`) activation |
+| Mid | Latency distribution histograms & percentile charts |
+| Mid | Fault injection / chaos toggles |
+| Long | Web dashboard for historical run comparison |
 
 ## 14. License
-No license specified yet. Add a LICENSE file (e.g. MIT, Apache-2.0) and update badges.
+Currently UNLICENSED. Select and add (MIT / Apache-2.0 / BSD-3) to enable broader usage. Replace badge after adding `LICENSE`.
 
 ## 15. Acknowledgements
-- Academic / seminar context inspiration
-- Open-source .NET ecosystem
-- Future contributors
+* Seminar / academic evaluation context
+* .NET & open-source ecosystem
+* Future contributors & reviewers
 
 ---
-
-### Multilingual Note
-An earlier German version existed; current canonical README is maintained in English for broader accessibility. You may add a `README.de.md` if bilingual support is desired.
+Multilingual note: German documentation retained in `Dokumentation/`. A German README (`README.de.md`) may be added later.
 
 ---
-
-Feel free to open issues for clarifications, ideas, or improvement proposals.
+Questions or improvement proposals welcome – open an issue.

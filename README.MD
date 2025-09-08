@@ -57,7 +57,7 @@ Diagrams: See `ClassDiagram.png`, `MicroserviceClassDiagram.puml`, `MonolithClas
 ## 4. Tech Stack
 | Domain | Tech |
 |--------|------|
-| Runtime | .NET 8 (C#) |
+| Runtime | .NET 9 (C#) |
 | Reporting / Charts | OxyPlot (PNG export) |
 | Serialization | JSON + (MsgPack helper placeholders) |
 | Persistence (benchmark db) | LiteDB / In-memory abstraction |

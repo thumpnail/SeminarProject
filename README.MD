@@ -77,7 +77,7 @@ Diagrams: See `ClassDiagram.png`, `MicroserviceClassDiagram.puml`, `MonolithClas
 
 ## 6. Quick Start
 ### Prerequisites
-* .NET 8 SDK
+* .NET 9 SDK
 * (Optional) Docker for containerization experiments
 
 ### Clone & Build
@@ -111,7 +111,7 @@ Benchmarks execute through `Chat.Tests` and spawn architecture‑specific tester
 
 ```powershell
 cd Chat.Tests
-dotnet test
+dotnet run
 ```
 
 Workflow performed per iteration:

@@ -44,19 +44,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d8dd006f-cc16-4b70-9bfa-c62546bc6054" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Build/Chat.Tests.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/Chat.Tests.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/Chat.Tests.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/Chat.Tests.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatApp.Client.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatApp.Client.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatApp.Server.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatApp.Server.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatApp.Server.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatApp.Server.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatApp.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatApp.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatApp.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatApp.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatDatabaseService.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatDatabaseService.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatDatabaseService.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatDatabaseService.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatHistoryService.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatHistoryService.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatHistoryService.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatHistoryService.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatMessagingService.exe" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatMessagingService.exe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Build/ChatMessagingService.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Build/ChatMessagingService.pdb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.SeminarProject/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.SeminarProject/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,7 +103,7 @@
     &quot;.NET Project.BlazorApp1.executor&quot;: &quot;Run&quot;,
     &quot;.NET Project.Chat.Benchmark.executor&quot;: &quot;Run&quot;,
     &quot;.NET Project.Chat.Reporter.executor&quot;: &quot;Run&quot;,
-    &quot;.NET Project.Chat.Test.executor&quot;: &quot;Debug&quot;,
+    &quot;.NET Project.Chat.Test.executor&quot;: &quot;Run&quot;,
     &quot;.NET Project.Chat.Tests.executor&quot;: &quot;Run&quot;,
     &quot;.NET Project.ChatApp.Client.executor&quot;: &quot;Run&quot;,
     &quot;.NET Project.ChatApp.Server.executor&quot;: &quot;Run&quot;,
@@ -152,7 +140,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Multi-Launch.Full Publish Task">
+  <component name="RunManager" selected="Multi-Launch.Full Server Start">
     <configuration name="ChatApp" type="DotNetFolderPublish" factoryName="Publish to folder">
       <riderPublish configuration="Release" platform="Any CPU" produce_single_file="true" self_contained="true" target_folder="$PROJECT_DIR$/Build" target_framework="net9.0" uuid_high="-8311453737822829375" uuid_low="-5666339402307082034">
         <runtimes>
@@ -368,20 +356,6 @@
       <option name="PROJECT_TFM" value="net9.0" />
       <method v="2">
         <option name="Build" />
-      </method>
-    </configuration>
-    <configuration default="true" type="GODOT_DEBUG_RUN_CONFIGURATION" factoryName="Start and Debug">
-      <option name="EXE_PATH" value="" />
-      <option name="PROGRAM_PARAMETERS" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="PASS_PARENT_ENVS" value="1" />
-      <option name="USE_EXTERNAL_CONSOLE" value="0" />
-      <option name="ENV_FILE_PATHS" value="" />
-      <option name="REDIRECT_INPUT_PATH" value="" />
-      <option name="PTY_MODE" value="Auto" />
-      <option name="MIXED_MODE_DEBUG" value="0" />
-      <method v="2">
-        <option name="Build Solution" enabled="true" />
       </method>
     </configuration>
     <configuration name="V Test AttributeTests" type="VlangTest" factoryName="VlangTest" temporary="true">
@@ -827,7 +801,7 @@
       <workItem from="1757323079705" duration="706000" />
       <workItem from="1758126538848" duration="593000" />
       <workItem from="1758196942011" duration="8223000" />
-      <workItem from="1758222224715" duration="1798000" />
+      <workItem from="1758222224715" duration="3501000" />
     </task>
     <servers />
   </component>

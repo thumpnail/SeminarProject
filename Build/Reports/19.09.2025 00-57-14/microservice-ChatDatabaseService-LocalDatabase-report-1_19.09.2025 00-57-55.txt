@@ -1,0 +1,32 @@
+
+
+-- Benchmark Results --
+
+ChatMicroserviceATester Benchmark Report
+
+Run Index Identifier: 74fe1860-59de-4a5f-91df-082c9dfe5016
+Anzahl Threads: 10
+Anzahl Nachrichten pro Thread: 25
+Thread Throttle: 0 ms
+Startzeit: 00:57:55.754
+Endzeit: 00:57:55.869
+Dauer: 0,115 Sekunden
+
+Benchmark abgeschlossen: 270 Requests verarbeitet.
+Endpoint: /room
+  Requests: 10
+  Avg Duration: 6,10 ms
+  Min Duration: 5,63 ms
+  Max Duration: 7,00 ms
+Endpoint: /history
+  Requests: 10
+  Avg Duration: 19,87 ms
+  Min Duration: 6,51 ms
+  Max Duration: 72,24 ms
+Endpoint: /send
+  Requests: 250
+  Avg Duration: 1,94 ms
+  Min Duration: 0,99 ms
+  Max Duration: 7,03 ms
+
+

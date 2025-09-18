@@ -1,9 +1,12 @@
+@echo off
+
 echo Parameters: [lite, memory, mock]
 
 start "" ".\ChatHistoryService.exe"
-start "" ".\ChatDatabaseService.exe"
+start "" ".\ChatDatabaseService.exe" lite
 start "" ".\ChatMessagingService.exe"
-start "" ".\ChatApp.Server.exe"
+start "" ".\ChatApp.Server.exe" lite
 
-.\Chat.Tests.exe mock
+echo Parameters: [lite, memory]
+.\Chat.Tests.exe memory
 pause

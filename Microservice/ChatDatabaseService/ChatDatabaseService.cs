@@ -32,7 +32,35 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment()) { }
 ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>();
 Logger logger = new("ChatDatabaseService");
-FlatMockDatabase database = new("../../../../../chat-microservice.db");
+IDatabase database;
+#if DEBUG
+database = new FlatMockDatabase("../../../../../chat-microservice.db");
+#elif  RELEASE
+if (args.Length > 0) {
+    switch (args[0]) {
+        case "lite":
+            database = new LiteBasedDatabase("./chat-monolith.db");
+            break;
+        case "memory":
+            database = new LocalDatabase();
+            break;
+        case "mock":
+            database = new FlatMockDatabase();
+            break;
+        case "help":
+        case "--help":
+            Console.WriteLine("Usage: ChatDatabaseService [lite|memory|mock]");
+            return;
+        default:
+            appLogger.LogWarning("No database type specified, defaulting to 'mock'. Use 'help' for options.\n");
+            database = new FlatMockDatabase();
+            break;
+    }
+} else {
+    appLogger.LogWarning("No database type specified, defaulting to 'mock'. Use 'help' for options.\n");
+    database = new FlatMockDatabase();
+}
+#endif
 // Beispiel-Endpunkt
 app.MapGet("/", () => $"Type=ChatDatabaseService;DBType={database.GetType().Name}");
 

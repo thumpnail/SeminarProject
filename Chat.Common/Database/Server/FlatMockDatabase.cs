@@ -4,7 +4,7 @@ namespace Chat.Common;
 
 public class FlatMockDatabase : IDatabase {
 
-    public FlatMockDatabase(string databasePath) {
+    public FlatMockDatabase(string databasePath = "flat-mock") {
         // No actual database connection is made in the mock
     }
     public MessageSendResponseContract InsertMessage(MessageSendContract messageSendContract) {

@@ -29,8 +29,35 @@ if (app.Environment.IsDevelopment()) {
 }
 ILogger<Program> appLogger = app.Services.GetRequiredService<ILogger<Program>>();
 Logger logger = new("ChatMonolith");
-FlatMockDatabase database = new("../../../../../chat-monolith.db");
-
+IDatabase database;
+#if DEBUG
+database = new FlatMockDatabase("../../../../../chat-monolith.db");
+#elif RELEASE
+if (args.Length > 0) {
+    switch (args[0]) {
+        case "lite":
+            database = new LiteBasedDatabase("./chat-monolith.db");
+            break;
+        case "memory":
+            database = new LocalDatabase();
+            break;
+        case "mock":
+            database = new FlatMockDatabase();
+            break;
+        case "help":
+        case "--help":
+            Console.WriteLine("Usage: ChatApp.Server [lite|memory|mock]");
+            return;
+        default:
+            appLogger.LogWarning("No database type specified, defaulting to 'mock'. Use 'help' for options.\n");
+            database = new FlatMockDatabase();
+            break;
+    }
+} else {
+    appLogger.LogWarning("No database type specified, defaulting to 'mock'. Use 'help' for options.\n");
+    database = new FlatMockDatabase();
+}
+#endif
 // Define a simple endpoint
 app.MapGet("/", () => $"Type=ChatMonolithServer;DBType={database.GetType().Name}");
 

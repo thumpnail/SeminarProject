@@ -1,0 +1,32 @@
+
+
+-- Benchmark Results --
+
+ChatMonolithATester Benchmark Report
+
+Run Index Identifier: 85ff3e90-f1c7-4be1-bfb1-009edc680e12
+Anzahl Threads: 10
+Anzahl Nachrichten pro Thread: 25
+Thread Throttle: 0 ms
+Startzeit: 20:59:32.155
+Endzeit: 20:59:32.816
+Dauer: 0,661 Sekunden
+
+Benchmark abgeschlossen: 270 Requests verarbeitet.
+Endpoint: /room
+  Requests: 10
+  Avg Duration: 28,37 ms
+  Min Duration: 10,97 ms
+  Max Duration: 47,78 ms
+Endpoint: /history
+  Requests: 10
+  Avg Duration: 14,98 ms
+  Min Duration: 14,09 ms
+  Max Duration: 15,78 ms
+Endpoint: /send
+  Requests: 250
+  Avg Duration: 17,54 ms
+  Min Duration: 10,79 ms
+  Max Duration: 110,70 ms
+
+

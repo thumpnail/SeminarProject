@@ -6,7 +6,7 @@ namespace Chat.Tests {
         private readonly List<BenchmarkTag> tagCollection = new();
         private int lastHttpStatusCode;
 
-        public InMemoryBenchmarkDatabase(string connectionString) {
+        public InMemoryBenchmarkDatabase(string connectionString = "") {
             // In-memory database, no initialization needed
         }
 

@@ -14,7 +14,12 @@ public class Logger {
         logOrigin = origin;
         _enabled = Environment.GetEnvironmentVariable("DISABLE_FILE_LOG") != "1";
         if (_enabled) {
+#if DEBUG
             _logFilePath = $"../../../../../log_{logOrigin}.log";
+#elif  RELEASE
+            _logFilePath = $"./log_{logOrigin}.log";
+#endif
+
             _writer = new StreamWriter(_logFilePath);
         } else {
             _logFilePath = string.Empty;

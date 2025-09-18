@@ -1,0 +1,17 @@
+
+
+-- Benchmark Results --
+
+ChatMonolithATester Benchmark Report
+
+Run Index Identifier: 5e811420-c0b5-44e7-a030-f07d53a55ea9
+Anzahl Threads: 10
+Anzahl Nachrichten pro Thread: 25
+Thread Throttle: 0 ms
+Startzeit: 20:53:13.489
+Endzeit: 20:53:18.076
+Dauer: 4,587 Sekunden
+
+Benchmark abgeschlossen: 0 Requests verarbeitet.
+
+

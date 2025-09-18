@@ -3,7 +3,8 @@ namespace Chat.Tests;
 
 public class FlatMockBenchmarkDatabase : IBenchmarkDatabase {
 
-    public FlatMockBenchmarkDatabase(string connectionString) {
+    public FlatMockBenchmarkDatabase(string connectionString = "") {
+        // No initialization needed
     }
     public IEnumerable<Data> GetDataCollection() {
         Thread.Sleep(5);

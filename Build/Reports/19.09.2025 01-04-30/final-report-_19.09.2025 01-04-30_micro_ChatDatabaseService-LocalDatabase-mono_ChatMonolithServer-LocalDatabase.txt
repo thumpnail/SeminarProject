@@ -1,0 +1,15 @@
+
+
+-- Final Benchmark Report --
+
+┌────────────────────────────────┬─────────────────────────────────┬─────────────────┬──────────────┬────────────────┬──────────────────────┬────────────────┬────────────────┬──────────────────────┬────────────────┬────────────────┬──────────────────────┬────────────────┐                                  
+│ EqualityContract               │ Endpoint                        │ IterationsCount │ ServerType   │ MinMinDuration │ MinAvgDuration       │ MinMaxDuration │ AvgMinDuration │ AvgAvgDuration       │ AvgMaxDuration │ MaxMinDuration │ MaxAvgDuration       │ MaxMaxDuration │
+├────────────────────────────────┼─────────────────────────────────┼─────────────────┼──────────────┼────────────────┼──────────────────────┼────────────────┼────────────────┼──────────────────────┼────────────────┼────────────────┼──────────────────────┼────────────────┤                                  
+│ Chat.Tests.FullReportViewModel │ ChatMicroserviceATester/room    │ 5               │ microservice │ 4,12 ms        │ 61,15 ms(20,174305%) │ 286,80 ms      │ 5,68 ms        │ 62,33 ms(20,146505%) │ 286,87 ms      │ 6,05 ms        │ 66,45 ms(21,497686%) │ 287,00 ms      │
+│ Chat.Tests.FullReportViewModel │ ChatMicroserviceATester/history │ 5               │ microservice │ 4,42 ms        │ 50,33 ms(20,558105%) │ 227,75 ms      │ 9,43 ms        │ 54,95 ms(20,84153%)  │ 227,83 ms      │ 15,59 ms       │ 73,07 ms(27,075396%) │ 227,87 ms      │
+│ Chat.Tests.FullReportViewModel │ ChatMicroserviceATester/send    │ 5               │ microservice │ 1,20 ms        │ 1,41 ms(55,610542%)  │ 1,57 ms        │ 2,26 ms        │ 2,63 ms(53,791046%)  │ 2,95 ms        │ 4,34 ms        │ 9,99 ms(33,344547%)  │ 21,28 ms       │
+│ Chat.Tests.FullReportViewModel │ ChatMonolithATester/room        │ 5               │ monolith     │ 0,75 ms        │ 11,91 ms(20,291067%) │ 55,77 ms       │ 1,04 ms        │ 12,32 ms(20,420547%) │ 56,26 ms       │ 1,28 ms        │ 12,81 ms(20,857134%) │ 56,57 ms       │
+│ Chat.Tests.FullReportViewModel │ ChatMonolithATester/history     │ 5               │ monolith     │ 0,72 ms        │ 4,69 ms(39,354206%)  │ 10,82 ms       │ 1,22 ms        │ 6,07 ms(49,983894%)  │ 10,92 ms       │ 1,48 ms        │ 12,02 ms(32,945423%) │ 33,49 ms       │
+│ Chat.Tests.FullReportViewModel │ ChatMonolithATester/send        │ 5               │ monolith     │ 0,51 ms        │ 0,55 ms(39,89973%)   │ 0,61 ms        │ 0,82 ms        │ 1,03 ms(28,22095%)   │ 1,57 ms        │ 1,22 ms        │ 4,54 ms(36,7018%)    │ 10,26 ms       │
+└────────────────────────────────┴─────────────────────────────────┴─────────────────┴──────────────┴────────────────┴──────────────────────┴────────────────┴────────────────┴──────────────────────┴────────────────┴────────────────┴──────────────────────┴────────────────┘                                  
+
